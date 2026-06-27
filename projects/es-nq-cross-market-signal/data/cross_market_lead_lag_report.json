@@ -1,0 +1,1716 @@
+{
+  "generated_at_utc": "2026-05-29T19:33:32+00:00",
+  "feature_log": "data\\cross_market_features.jsonl",
+  "lag_grid_seconds": [
+    0,
+    5,
+    15,
+    30,
+    60,
+    120,
+    180,
+    300
+  ],
+  "results": {
+    "ES_5m": {
+      "rows": 2360,
+      "lags_seconds": [
+        0,
+        5,
+        15,
+        30,
+        60,
+        120,
+        180,
+        300
+      ],
+      "top_overall": [
+        {
+          "predictor": "target_ofi_300s_z",
+          "lag_seconds": 300,
+          "n": 1806,
+          "pearson_r": -0.29036004122005243,
+          "abs_r": 0.29036004122005243,
+          "t_stat": -12.88785472978698
+        },
+        {
+          "predictor": "bonds_zn_ofi",
+          "lag_seconds": 300,
+          "n": 2106,
+          "pearson_r": -0.28863110621928206,
+          "abs_r": 0.28863110621928206,
+          "t_stat": -13.827837300410769
+        },
+        {
+          "predictor": "bonds_zn_ofi_lag30",
+          "lag_seconds": 180,
+          "n": 2184,
+          "pearson_r": -0.25080134011646976,
+          "abs_r": 0.25080134011646976,
+          "t_stat": -12.102206554989214
+        },
+        {
+          "predictor": "bonds_zn_ofi",
+          "lag_seconds": 180,
+          "n": 2205,
+          "pearson_r": -0.2457800708633634,
+          "abs_r": 0.2457800708633634,
+          "t_stat": -11.901021019807107
+        },
+        {
+          "predictor": "bonds_zb_ofi",
+          "lag_seconds": 300,
+          "n": 2105,
+          "pearson_r": 0.24212609450138325,
+          "abs_r": 0.24212609450138325,
+          "t_stat": 11.444054397089165
+        },
+        {
+          "predictor": "bonds_zn_ofi_lag30",
+          "lag_seconds": 120,
+          "n": 2233,
+          "pearson_r": -0.22164844137945372,
+          "abs_r": 0.22164844137945372,
+          "t_stat": -10.736270488329938
+        },
+        {
+          "predictor": "target_ofi_300s_z",
+          "lag_seconds": 180,
+          "n": 1914,
+          "pearson_r": -0.21653881370516684,
+          "abs_r": 0.21653881370516684,
+          "t_stat": -9.6985759119888
+        },
+        {
+          "predictor": "bonds_zb_ofi_lag30",
+          "lag_seconds": 180,
+          "n": 2184,
+          "pearson_r": 0.21268673193362,
+          "abs_r": 0.21268673193362,
+          "t_stat": 10.167628576360908
+        },
+        {
+          "predictor": "oil_cl_ofi",
+          "lag_seconds": 300,
+          "n": 2108,
+          "pearson_r": -0.21142558603927591,
+          "abs_r": 0.21142558603927591,
+          "t_stat": -9.926976974918066
+        },
+        {
+          "predictor": "bonds_zb_ofi",
+          "lag_seconds": 180,
+          "n": 2204,
+          "pearson_r": 0.2071203621182597,
+          "abs_r": 0.2071203621182597,
+          "t_stat": 9.934649138169998
+        },
+        {
+          "predictor": "cross_rty_lag30",
+          "lag_seconds": 180,
+          "n": 2184,
+          "pearson_r": 0.20691160019654206,
+          "abs_r": 0.20691160019654206,
+          "t_stat": 9.879015867004442
+        },
+        {
+          "predictor": "cross_rty",
+          "lag_seconds": 300,
+          "n": 2109,
+          "pearson_r": 0.20564219917232368,
+          "abs_r": 0.20564219917232368,
+          "t_stat": 9.645554623096443
+        },
+        {
+          "predictor": "bonds_zb_ofi_lag30",
+          "lag_seconds": 120,
+          "n": 2233,
+          "pearson_r": 0.18945313215578224,
+          "abs_r": 0.18945313215578224,
+          "t_stat": 9.113576464803844
+        },
+        {
+          "predictor": "bonds_zn_ofi",
+          "lag_seconds": 120,
+          "n": 2254,
+          "pearson_r": -0.1832780824657748,
+          "abs_r": 0.1832780824657748,
+          "t_stat": -8.847370410644269
+        },
+        {
+          "predictor": "cross_rty_lag30",
+          "lag_seconds": 120,
+          "n": 2233,
+          "pearson_r": 0.17695685747790185,
+          "abs_r": 0.17695685747790185,
+          "t_stat": 8.492305522445251
+        },
+        {
+          "predictor": "bonds_zn_ofi_lag30",
+          "lag_seconds": 15,
+          "n": 2320,
+          "pearson_r": -0.1763477198927605,
+          "abs_r": 0.1763477198927605,
+          "t_stat": -8.62554915724208
+        },
+        {
+          "predictor": "bonds_zn_ofi_lag30",
+          "lag_seconds": 30,
+          "n": 2308,
+          "pearson_r": -0.17196463307953808,
+          "abs_r": 0.17196463307953808,
+          "t_stat": -8.382761160515066
+        },
+        {
+          "predictor": "bonds_zn_ofi",
+          "lag_seconds": 60,
+          "n": 2305,
+          "pearson_r": -0.17123363787334994,
+          "abs_r": 0.17123363787334994,
+          "t_stat": -8.340617906815684
+        },
+        {
+          "predictor": "cross_rty",
+          "lag_seconds": 180,
+          "n": 2208,
+          "pearson_r": 0.1674694255645504,
+          "abs_r": 0.1674694255645504,
+          "t_stat": 7.97839310845381
+        },
+        {
+          "predictor": "bonds_zn_ofi_lag30",
+          "lag_seconds": 5,
+          "n": 2329,
+          "pearson_r": -0.16490196884433894,
+          "abs_r": 0.16490196884433894,
+          "t_stat": -8.06511590416879
+        },
+        {
+          "predictor": "oil_cl_ofi_lag30",
+          "lag_seconds": 180,
+          "n": 2184,
+          "pearson_r": -0.16247330112349226,
+          "abs_r": 0.16247330112349226,
+          "t_stat": -7.691632996728606
+        },
+        {
+          "predictor": "bonds_zn_ofi_lag30",
+          "lag_seconds": 0,
+          "n": 2334,
+          "pearson_r": -0.1573493162799222,
+          "abs_r": 0.1573493162799222,
+          "t_stat": -7.694370855486148
+        },
+        {
+          "predictor": "bonds_zn_ofi",
+          "lag_seconds": 30,
+          "n": 2331,
+          "pearson_r": -0.15619990567056424,
+          "abs_r": 0.15619990567056424,
+          "t_stat": -7.6318400885923054
+        },
+        {
+          "predictor": "bonds_zb_ofi",
+          "lag_seconds": 120,
+          "n": 2253,
+          "pearson_r": 0.15362581798676095,
+          "abs_r": 0.15362581798676095,
+          "t_stat": 7.376294858869956
+        },
+        {
+          "predictor": "oil_cl_ofi",
+          "lag_seconds": 180,
+          "n": 2207,
+          "pearson_r": -0.15253261369428525,
+          "abs_r": 0.15253261369428525,
+          "t_stat": -7.247344405940323
+        },
+        {
+          "predictor": "bonds_zb_ofi",
+          "lag_seconds": 60,
+          "n": 2304,
+          "pearson_r": 0.15088279453344133,
+          "abs_r": 0.15088279453344133,
+          "t_stat": 7.323067032887809
+        },
+        {
+          "predictor": "bonds_zb_ofi_lag30",
+          "lag_seconds": 15,
+          "n": 2320,
+          "pearson_r": 0.1501183277167461,
+          "abs_r": 0.1501183277167461,
+          "t_stat": 7.3103797828341595
+        },
+        {
+          "predictor": "bonds_zb_ofi_lag30",
+          "lag_seconds": 30,
+          "n": 2308,
+          "pearson_r": 0.14967423771499205,
+          "abs_r": 0.14967423771499205,
+          "t_stat": 7.2693677191718225
+        },
+        {
+          "predictor": "cross_rty_lag30",
+          "lag_seconds": 15,
+          "n": 2320,
+          "pearson_r": 0.14431288628159475,
+          "abs_r": 0.14431288628159475,
+          "t_stat": 7.021532952571777
+        },
+        {
+          "predictor": "bonds_zb_ofi_lag30",
+          "lag_seconds": 5,
+          "n": 2329,
+          "pearson_r": 0.1386808427210708,
+          "abs_r": 0.1386808427210708,
+          "t_stat": 6.755097211384754
+        }
+      ],
+      "best_by_predictor": [
+        {
+          "predictor": "target_ofi_300s_z",
+          "lag_seconds": 300,
+          "n": 1806,
+          "pearson_r": -0.29036004122005243,
+          "abs_r": 0.29036004122005243,
+          "t_stat": -12.88785472978698
+        },
+        {
+          "predictor": "bonds_zn_ofi",
+          "lag_seconds": 300,
+          "n": 2106,
+          "pearson_r": -0.28863110621928206,
+          "abs_r": 0.28863110621928206,
+          "t_stat": -13.827837300410769
+        },
+        {
+          "predictor": "bonds_zn_ofi_lag30",
+          "lag_seconds": 180,
+          "n": 2184,
+          "pearson_r": -0.25080134011646976,
+          "abs_r": 0.25080134011646976,
+          "t_stat": -12.102206554989214
+        },
+        {
+          "predictor": "bonds_zb_ofi",
+          "lag_seconds": 300,
+          "n": 2105,
+          "pearson_r": 0.24212609450138325,
+          "abs_r": 0.24212609450138325,
+          "t_stat": 11.444054397089165
+        },
+        {
+          "predictor": "bonds_zb_ofi_lag30",
+          "lag_seconds": 180,
+          "n": 2184,
+          "pearson_r": 0.21268673193362,
+          "abs_r": 0.21268673193362,
+          "t_stat": 10.167628576360908
+        },
+        {
+          "predictor": "oil_cl_ofi",
+          "lag_seconds": 300,
+          "n": 2108,
+          "pearson_r": -0.21142558603927591,
+          "abs_r": 0.21142558603927591,
+          "t_stat": -9.926976974918066
+        },
+        {
+          "predictor": "cross_rty_lag30",
+          "lag_seconds": 180,
+          "n": 2184,
+          "pearson_r": 0.20691160019654206,
+          "abs_r": 0.20691160019654206,
+          "t_stat": 9.879015867004442
+        },
+        {
+          "predictor": "cross_rty",
+          "lag_seconds": 300,
+          "n": 2109,
+          "pearson_r": 0.20564219917232368,
+          "abs_r": 0.20564219917232368,
+          "t_stat": 9.645554623096443
+        },
+        {
+          "predictor": "oil_cl_ofi_lag30",
+          "lag_seconds": 180,
+          "n": 2184,
+          "pearson_r": -0.16247330112349226,
+          "abs_r": 0.16247330112349226,
+          "t_stat": -7.691632996728606
+        },
+        {
+          "predictor": "cross_es_nq",
+          "lag_seconds": 180,
+          "n": 2208,
+          "pearson_r": 0.12939412996758176,
+          "abs_r": 0.12939412996758176,
+          "t_stat": 6.1289174263641995
+        },
+        {
+          "predictor": "target_ofi_60s_z",
+          "lag_seconds": 300,
+          "n": 1806,
+          "pearson_r": -0.10750180052049939,
+          "abs_r": 0.10750180052049939,
+          "t_stat": -4.59259459128911
+        },
+        {
+          "predictor": "cross_ym",
+          "lag_seconds": 300,
+          "n": 2109,
+          "pearson_r": 0.0871457103207978,
+          "abs_r": 0.0871457103207978,
+          "t_stat": 4.015444922576762
+        },
+        {
+          "predictor": "macro_lead_score",
+          "lag_seconds": 0,
+          "n": 2360,
+          "pearson_r": -0.07920858776896562,
+          "abs_r": 0.07920858776896562,
+          "t_stat": -3.8584319418041204
+        },
+        {
+          "predictor": "macro_regime_score",
+          "lag_seconds": 30,
+          "n": 2334,
+          "pearson_r": -0.07892819450496733,
+          "abs_r": 0.07892819450496733,
+          "t_stat": -3.8234324877804458
+        },
+        {
+          "predictor": "cross_ym_lag30",
+          "lag_seconds": 120,
+          "n": 2233,
+          "pearson_r": 0.07851064494228399,
+          "abs_r": 0.07851064494228399,
+          "t_stat": 3.719811654784108
+        },
+        {
+          "predictor": "gold_gc_ofi",
+          "lag_seconds": 300,
+          "n": 2107,
+          "pearson_r": -0.07635515561900433,
+          "abs_r": 0.07635515561900433,
+          "t_stat": -3.5134527210464244
+        },
+        {
+          "predictor": "cross_es_nq_lag30",
+          "lag_seconds": 15,
+          "n": 2321,
+          "pearson_r": 0.05413717520763262,
+          "abs_r": 0.05413717520763262,
+          "t_stat": 2.6108584238663917
+        },
+        {
+          "predictor": "gold_gc_ofi_lag30",
+          "lag_seconds": 120,
+          "n": 2233,
+          "pearson_r": -0.04921471146722399,
+          "abs_r": 0.04921471146722399,
+          "t_stat": -2.327401533335006
+        },
+        {
+          "predictor": "cross_index_lead_balance",
+          "lag_seconds": 300,
+          "n": 2109,
+          "pearson_r": -0.03424349275988743,
+          "abs_r": 0.03424349275988743,
+          "t_stat": -1.5727695889151203
+        },
+        {
+          "predictor": "cross_index_balance",
+          "lag_seconds": 5,
+          "n": 2355,
+          "pearson_r": 0.030334441622043264,
+          "abs_r": 0.030334441622043264,
+          "t_stat": 1.4721324126979176
+        },
+        {
+          "predictor": "target_ofi_15s_z",
+          "lag_seconds": 60,
+          "n": 2020,
+          "pearson_r": 0.02882501765673021,
+          "abs_r": 0.02882501765673021,
+          "t_stat": 1.295420190158461
+        }
+      ]
+    },
+    "ES_10m": {
+      "rows": 2102,
+      "lags_seconds": [
+        0,
+        5,
+        15,
+        30,
+        60,
+        120,
+        180,
+        300
+      ],
+      "top_overall": [
+        {
+          "predictor": "bonds_zn_ofi",
+          "lag_seconds": 300,
+          "n": 1848,
+          "pearson_r": -0.30807645551022433,
+          "abs_r": 0.30807645551022433,
+          "t_stat": -13.913254796857403
+        },
+        {
+          "predictor": "bonds_zb_ofi",
+          "lag_seconds": 300,
+          "n": 1847,
+          "pearson_r": 0.25977605605313203,
+          "abs_r": 0.25977605605313203,
+          "t_stat": 11.554976455414012
+        },
+        {
+          "predictor": "bonds_zn_ofi_lag30",
+          "lag_seconds": 180,
+          "n": 1926,
+          "pearson_r": -0.23572339349822574,
+          "abs_r": 0.23572339349822574,
+          "t_stat": -10.639453013839304
+        },
+        {
+          "predictor": "oil_cl_ofi",
+          "lag_seconds": 300,
+          "n": 1850,
+          "pearson_r": -0.2211072875451363,
+          "abs_r": 0.2211072875451363,
+          "t_stat": -9.746267084442188
+        },
+        {
+          "predictor": "cross_rty",
+          "lag_seconds": 300,
+          "n": 1851,
+          "pearson_r": 0.21628229563135662,
+          "abs_r": 0.21628229563135662,
+          "t_stat": 9.525601405851557
+        },
+        {
+          "predictor": "bonds_zn_ofi",
+          "lag_seconds": 180,
+          "n": 1947,
+          "pearson_r": -0.21295915699952706,
+          "abs_r": 0.21295915699952706,
+          "t_stat": -9.612456730488866
+        },
+        {
+          "predictor": "bonds_zb_ofi_lag30",
+          "lag_seconds": 180,
+          "n": 1926,
+          "pearson_r": 0.19960711387499044,
+          "abs_r": 0.19960711387499044,
+          "t_stat": 8.935264703145977
+        },
+        {
+          "predictor": "cross_rty_lag30",
+          "lag_seconds": 180,
+          "n": 1926,
+          "pearson_r": 0.1935079156235398,
+          "abs_r": 0.1935079156235398,
+          "t_stat": 8.651443230452221
+        },
+        {
+          "predictor": "target_ofi_300s_z",
+          "lag_seconds": 30,
+          "n": 1785,
+          "pearson_r": -0.18900851400144342,
+          "abs_r": 0.18900851400144342,
+          "t_stat": -8.127489359488328
+        },
+        {
+          "predictor": "target_ofi_300s_z",
+          "lag_seconds": 0,
+          "n": 1810,
+          "pearson_r": -0.18123450000876618,
+          "abs_r": 0.18123450000876618,
+          "t_stat": -7.835960865013808
+        },
+        {
+          "predictor": "bonds_zn_ofi_lag30",
+          "lag_seconds": 120,
+          "n": 1975,
+          "pearson_r": -0.1812175550058775,
+          "abs_r": 0.1812175550058775,
+          "t_stat": -8.184923064076386
+        },
+        {
+          "predictor": "bonds_zn_ofi_lag30",
+          "lag_seconds": 30,
+          "n": 2050,
+          "pearson_r": -0.17852209359031335,
+          "abs_r": 0.17852209359031335,
+          "t_stat": -8.210888211011033
+        },
+        {
+          "predictor": "target_ofi_300s_z",
+          "lag_seconds": 5,
+          "n": 1806,
+          "pearson_r": -0.17841499481303008,
+          "abs_r": 0.17841499481303008,
+          "t_stat": -7.701480782774434
+        },
+        {
+          "predictor": "bonds_zn_ofi",
+          "lag_seconds": 60,
+          "n": 2047,
+          "pearson_r": -0.17798880814232557,
+          "abs_r": 0.17798880814232557,
+          "t_stat": -8.179559268843581
+        },
+        {
+          "predictor": "bonds_zb_ofi",
+          "lag_seconds": 180,
+          "n": 1946,
+          "pearson_r": 0.17679778492568718,
+          "abs_r": 0.17679778492568718,
+          "t_stat": 7.9199194298187185
+        },
+        {
+          "predictor": "target_ofi_300s_z",
+          "lag_seconds": 60,
+          "n": 1762,
+          "pearson_r": -0.17254644555339452,
+          "abs_r": 0.17254644555339452,
+          "t_stat": -7.348953695940831
+        },
+        {
+          "predictor": "bonds_zn_ofi_lag30",
+          "lag_seconds": 15,
+          "n": 2062,
+          "pearson_r": -0.17162605576181073,
+          "abs_r": 0.17162605576181073,
+          "t_stat": -7.906952071006456
+        },
+        {
+          "predictor": "target_ofi_300s_z",
+          "lag_seconds": 15,
+          "n": 1798,
+          "pearson_r": -0.1695719020743574,
+          "abs_r": 0.1695719020743574,
+          "t_stat": -7.291931446058877
+        },
+        {
+          "predictor": "bonds_zn_ofi",
+          "lag_seconds": 0,
+          "n": 2099,
+          "pearson_r": -0.16598343518512074,
+          "abs_r": 0.16598343518512074,
+          "t_stat": -7.707799965122951
+        },
+        {
+          "predictor": "bonds_zn_ofi_lag30",
+          "lag_seconds": 60,
+          "n": 2024,
+          "pearson_r": -0.16582515540809245,
+          "abs_r": 0.16582515540809245,
+          "t_stat": -7.5612871807289075
+        },
+        {
+          "predictor": "bonds_zn_ofi",
+          "lag_seconds": 15,
+          "n": 2086,
+          "pearson_r": -0.1648323824852018,
+          "abs_r": 0.1648323824852018,
+          "t_stat": -7.6290919991624895
+        },
+        {
+          "predictor": "bonds_zn_ofi",
+          "lag_seconds": 5,
+          "n": 2094,
+          "pearson_r": -0.16284421114918574,
+          "abs_r": 0.16284421114918574,
+          "t_stat": -7.548997035912026
+        },
+        {
+          "predictor": "bonds_zn_ofi",
+          "lag_seconds": 120,
+          "n": 1996,
+          "pearson_r": -0.1618965745975176,
+          "abs_r": 0.1618965745975176,
+          "t_stat": -7.326013144345914
+        },
+        {
+          "predictor": "bonds_zn_ofi_lag30",
+          "lag_seconds": 300,
+          "n": 1827,
+          "pearson_r": -0.16187277386399052,
+          "abs_r": 0.16187277386399052,
+          "t_stat": -7.007627066843194
+        },
+        {
+          "predictor": "bonds_zn_ofi_lag30",
+          "lag_seconds": 0,
+          "n": 2076,
+          "pearson_r": -0.15969475517908252,
+          "abs_r": 0.15969475517908252,
+          "t_stat": -7.367237071767989
+        },
+        {
+          "predictor": "bonds_zn_ofi_lag30",
+          "lag_seconds": 5,
+          "n": 2071,
+          "pearson_r": -0.15955679786884802,
+          "abs_r": 0.15955679786884802,
+          "t_stat": -7.351828368554157
+        },
+        {
+          "predictor": "bonds_zn_ofi",
+          "lag_seconds": 30,
+          "n": 2073,
+          "pearson_r": -0.158553812934318,
+          "abs_r": 0.158553812934318,
+          "t_stat": -7.3079482128989435
+        },
+        {
+          "predictor": "oil_cl_ofi_lag30",
+          "lag_seconds": 180,
+          "n": 1926,
+          "pearson_r": -0.15561389430128558,
+          "abs_r": 0.15561389430128558,
+          "t_stat": -6.909935419462259
+        },
+        {
+          "predictor": "bonds_zb_ofi",
+          "lag_seconds": 60,
+          "n": 2046,
+          "pearson_r": 0.15196723625273845,
+          "abs_r": 0.15196723625273845,
+          "t_stat": 6.951267982670042
+        },
+        {
+          "predictor": "bonds_zb_ofi_lag30",
+          "lag_seconds": 120,
+          "n": 1975,
+          "pearson_r": 0.15150849621149456,
+          "abs_r": 0.15150849621149456,
+          "t_stat": 6.808370918153979
+        }
+      ],
+      "best_by_predictor": [
+        {
+          "predictor": "bonds_zn_ofi",
+          "lag_seconds": 300,
+          "n": 1848,
+          "pearson_r": -0.30807645551022433,
+          "abs_r": 0.30807645551022433,
+          "t_stat": -13.913254796857403
+        },
+        {
+          "predictor": "bonds_zb_ofi",
+          "lag_seconds": 300,
+          "n": 1847,
+          "pearson_r": 0.25977605605313203,
+          "abs_r": 0.25977605605313203,
+          "t_stat": 11.554976455414012
+        },
+        {
+          "predictor": "bonds_zn_ofi_lag30",
+          "lag_seconds": 180,
+          "n": 1926,
+          "pearson_r": -0.23572339349822574,
+          "abs_r": 0.23572339349822574,
+          "t_stat": -10.639453013839304
+        },
+        {
+          "predictor": "oil_cl_ofi",
+          "lag_seconds": 300,
+          "n": 1850,
+          "pearson_r": -0.2211072875451363,
+          "abs_r": 0.2211072875451363,
+          "t_stat": -9.746267084442188
+        },
+        {
+          "predictor": "cross_rty",
+          "lag_seconds": 300,
+          "n": 1851,
+          "pearson_r": 0.21628229563135662,
+          "abs_r": 0.21628229563135662,
+          "t_stat": 9.525601405851557
+        },
+        {
+          "predictor": "bonds_zb_ofi_lag30",
+          "lag_seconds": 180,
+          "n": 1926,
+          "pearson_r": 0.19960711387499044,
+          "abs_r": 0.19960711387499044,
+          "t_stat": 8.935264703145977
+        },
+        {
+          "predictor": "cross_rty_lag30",
+          "lag_seconds": 180,
+          "n": 1926,
+          "pearson_r": 0.1935079156235398,
+          "abs_r": 0.1935079156235398,
+          "t_stat": 8.651443230452221
+        },
+        {
+          "predictor": "target_ofi_300s_z",
+          "lag_seconds": 30,
+          "n": 1785,
+          "pearson_r": -0.18900851400144342,
+          "abs_r": 0.18900851400144342,
+          "t_stat": -8.127489359488328
+        },
+        {
+          "predictor": "oil_cl_ofi_lag30",
+          "lag_seconds": 180,
+          "n": 1926,
+          "pearson_r": -0.15561389430128558,
+          "abs_r": 0.15561389430128558,
+          "t_stat": -6.909935419462259
+        },
+        {
+          "predictor": "cross_es_nq",
+          "lag_seconds": 300,
+          "n": 1851,
+          "pearson_r": 0.13140382161872496,
+          "abs_r": 0.13140382161872496,
+          "t_stat": 5.69978762094843
+        },
+        {
+          "predictor": "macro_lead_score",
+          "lag_seconds": 300,
+          "n": 1851,
+          "pearson_r": 0.11101440863223641,
+          "abs_r": 0.11101440863223641,
+          "t_stat": 4.803309804630485
+        },
+        {
+          "predictor": "gold_gc_ofi",
+          "lag_seconds": 300,
+          "n": 1849,
+          "pearson_r": -0.09773141526821556,
+          "abs_r": 0.09773141526821556,
+          "t_stat": -4.220381113676172
+        },
+        {
+          "predictor": "cross_ym",
+          "lag_seconds": 300,
+          "n": 1851,
+          "pearson_r": 0.09682379936020585,
+          "abs_r": 0.09682379936020585,
+          "t_stat": 4.183077402006964
+        },
+        {
+          "predictor": "macro_regime_score",
+          "lag_seconds": 300,
+          "n": 1851,
+          "pearson_r": 0.09145636724670261,
+          "abs_r": 0.09145636724670261,
+          "t_stat": 3.9491744477810116
+        },
+        {
+          "predictor": "target_ofi_60s_z",
+          "lag_seconds": 0,
+          "n": 1810,
+          "pearson_r": -0.07299871763355867,
+          "abs_r": 0.07299871763355867,
+          "t_stat": -3.1122514295037225
+        },
+        {
+          "predictor": "cross_ym_lag30",
+          "lag_seconds": 300,
+          "n": 1827,
+          "pearson_r": 0.06957846124528756,
+          "abs_r": 0.06957846124528756,
+          "t_stat": 2.9796143158584307
+        },
+        {
+          "predictor": "gold_gc_ofi_lag30",
+          "lag_seconds": 180,
+          "n": 1926,
+          "pearson_r": -0.048795119387995245,
+          "abs_r": 0.048795119387995245,
+          "t_stat": -2.142873602718023
+        },
+        {
+          "predictor": "cross_es_nq_lag30",
+          "lag_seconds": 120,
+          "n": 1976,
+          "pearson_r": 0.04704087603821114,
+          "abs_r": 0.04704087603821114,
+          "t_stat": 2.0923292219303273
+        },
+        {
+          "predictor": "target_ofi_15s_z",
+          "lag_seconds": 15,
+          "n": 1798,
+          "pearson_r": -0.0314029573633384,
+          "abs_r": 0.0314029573633384,
+          "t_stat": -1.331490156720907
+        },
+        {
+          "predictor": "cross_index_lead_balance",
+          "lag_seconds": 5,
+          "n": 2097,
+          "pearson_r": -0.02134442397671601,
+          "abs_r": 0.02134442397671601,
+          "t_stat": -0.9771818774365976
+        },
+        {
+          "predictor": "cross_index_balance",
+          "lag_seconds": 300,
+          "n": 1851,
+          "pearson_r": -0.01610361070152328,
+          "abs_r": 0.01610361070152328,
+          "t_stat": -0.6925450635546834
+        }
+      ]
+    },
+    "NQ_5m": {
+      "rows": 2361,
+      "lags_seconds": [
+        0,
+        5,
+        15,
+        30,
+        60,
+        120,
+        180,
+        300
+      ],
+      "top_overall": [
+        {
+          "predictor": "cross_es_nq",
+          "lag_seconds": 0,
+          "n": 2360,
+          "pearson_r": 0.48551816422760835,
+          "abs_r": 0.48551816422760835,
+          "t_stat": 26.968287934065447
+        },
+        {
+          "predictor": "cross_es_nq",
+          "lag_seconds": 5,
+          "n": 2355,
+          "pearson_r": 0.47832509421461505,
+          "abs_r": 0.47832509421461505,
+          "t_stat": 26.4209957778081
+        },
+        {
+          "predictor": "cross_es_nq",
+          "lag_seconds": 15,
+          "n": 2347,
+          "pearson_r": 0.4620041566102975,
+          "abs_r": 0.4620041566102975,
+          "t_stat": 25.226299208899338
+        },
+        {
+          "predictor": "cross_es_nq",
+          "lag_seconds": 30,
+          "n": 2334,
+          "pearson_r": 0.436707410947937,
+          "abs_r": 0.436707410947937,
+          "t_stat": 23.44248518904904
+        },
+        {
+          "predictor": "cross_es_nq",
+          "lag_seconds": 60,
+          "n": 2308,
+          "pearson_r": 0.39484937985527746,
+          "abs_r": 0.39484937985527746,
+          "t_stat": 20.637909969002855
+        },
+        {
+          "predictor": "cross_es_nq",
+          "lag_seconds": 120,
+          "n": 2257,
+          "pearson_r": 0.3775964741289043,
+          "abs_r": 0.3775964741289043,
+          "t_stat": 19.36440557378349
+        },
+        {
+          "predictor": "cross_es_nq",
+          "lag_seconds": 180,
+          "n": 2208,
+          "pearson_r": 0.3494774481061846,
+          "abs_r": 0.3494774481061846,
+          "t_stat": 17.518943652308355
+        },
+        {
+          "predictor": "cross_es_nq",
+          "lag_seconds": 300,
+          "n": 2109,
+          "pearson_r": 0.3106544878436333,
+          "abs_r": 0.3106544878436333,
+          "t_stat": 15.001936196268087
+        },
+        {
+          "predictor": "target_ofi_300s_z",
+          "lag_seconds": 180,
+          "n": 2199,
+          "pearson_r": 0.23546576070776493,
+          "abs_r": 0.23546576070776493,
+          "t_stat": 11.356093678072058
+        },
+        {
+          "predictor": "bonds_zn_ofi_lag30",
+          "lag_seconds": 15,
+          "n": 2320,
+          "pearson_r": -0.22711785700400144,
+          "abs_r": 0.22711785700400144,
+          "t_stat": -11.228150439771476
+        },
+        {
+          "predictor": "bonds_zn_ofi",
+          "lag_seconds": 15,
+          "n": 2344,
+          "pearson_r": -0.21920944771232603,
+          "abs_r": 0.21920944771232603,
+          "t_stat": -10.872922155996408
+        },
+        {
+          "predictor": "bonds_zn_ofi_lag30",
+          "lag_seconds": 0,
+          "n": 2334,
+          "pearson_r": -0.2153473451326466,
+          "abs_r": 0.2153473451326466,
+          "t_stat": -10.649147991669375
+        },
+        {
+          "predictor": "bonds_zn_ofi_lag30",
+          "lag_seconds": 5,
+          "n": 2329,
+          "pearson_r": -0.21513383425962906,
+          "abs_r": 0.21513383425962906,
+          "t_stat": -10.626666435392888
+        },
+        {
+          "predictor": "bonds_zn_ofi",
+          "lag_seconds": 30,
+          "n": 2331,
+          "pearson_r": -0.21379252951719838,
+          "abs_r": 0.21379252951719838,
+          "t_stat": -10.561763945391151
+        },
+        {
+          "predictor": "target_ofi_300s_z",
+          "lag_seconds": 300,
+          "n": 2100,
+          "pearson_r": 0.21195558454146654,
+          "abs_r": 0.21195558454146654,
+          "t_stat": 9.934108652063022
+        },
+        {
+          "predictor": "bonds_zn_ofi",
+          "lag_seconds": 0,
+          "n": 2357,
+          "pearson_r": -0.21116131401299304,
+          "abs_r": 0.21116131401299304,
+          "t_stat": -10.483703165028322
+        },
+        {
+          "predictor": "bonds_zn_ofi",
+          "lag_seconds": 5,
+          "n": 2352,
+          "pearson_r": -0.21082412014969384,
+          "abs_r": 0.21082412014969384,
+          "t_stat": -10.455066373056647
+        },
+        {
+          "predictor": "bonds_zn_ofi_lag30",
+          "lag_seconds": 30,
+          "n": 2308,
+          "pearson_r": -0.19343405654686258,
+          "abs_r": 0.19343405654686258,
+          "t_stat": -9.467677094296413
+        },
+        {
+          "predictor": "bonds_zn_ofi",
+          "lag_seconds": 60,
+          "n": 2305,
+          "pearson_r": -0.1932460664736176,
+          "abs_r": 0.1932460664736176,
+          "t_stat": -9.451964462459571
+        },
+        {
+          "predictor": "bonds_zb_ofi_lag30",
+          "lag_seconds": 15,
+          "n": 2320,
+          "pearson_r": 0.1916941658877476,
+          "abs_r": 0.1916941658877476,
+          "t_stat": 9.40362599945104
+        },
+        {
+          "predictor": "bonds_zb_ofi",
+          "lag_seconds": 15,
+          "n": 2343,
+          "pearson_r": 0.1881762449799636,
+          "abs_r": 0.1881762449799636,
+          "t_stat": 9.270308663086704
+        },
+        {
+          "predictor": "cross_rty_lag30",
+          "lag_seconds": 15,
+          "n": 2320,
+          "pearson_r": 0.1875346248056999,
+          "abs_r": 0.1875346248056999,
+          "t_stat": 9.192054873766248
+        },
+        {
+          "predictor": "target_ofi_300s_z",
+          "lag_seconds": 0,
+          "n": 2351,
+          "pearson_r": 0.18727785714670003,
+          "abs_r": 0.18727785714670003,
+          "t_stat": 9.240185917445285
+        },
+        {
+          "predictor": "target_ofi_300s_z",
+          "lag_seconds": 5,
+          "n": 2346,
+          "pearson_r": 0.18622223648230044,
+          "abs_r": 0.18622223648230044,
+          "t_stat": 9.176443649500081
+        },
+        {
+          "predictor": "bonds_zb_ofi_lag30",
+          "lag_seconds": 5,
+          "n": 2329,
+          "pearson_r": 0.18525442023288408,
+          "abs_r": 0.18525442023288408,
+          "t_stat": 9.093895776578911
+        },
+        {
+          "predictor": "bonds_zb_ofi_lag30",
+          "lag_seconds": 0,
+          "n": 2334,
+          "pearson_r": 0.18482606308421182,
+          "abs_r": 0.18482606308421182,
+          "t_stat": 9.081865033715463
+        },
+        {
+          "predictor": "cross_rty_lag30",
+          "lag_seconds": 5,
+          "n": 2329,
+          "pearson_r": 0.18308471776312382,
+          "abs_r": 0.18308471776312382,
+          "t_stat": 8.983671313910737
+        },
+        {
+          "predictor": "bonds_zb_ofi",
+          "lag_seconds": 5,
+          "n": 2351,
+          "pearson_r": 0.18198515497336715,
+          "abs_r": 0.18198515497336715,
+          "t_stat": 8.969967460583568
+        },
+        {
+          "predictor": "bonds_zb_ofi",
+          "lag_seconds": 0,
+          "n": 2356,
+          "pearson_r": 0.18184371106634048,
+          "abs_r": 0.18184371106634048,
+          "t_stat": 8.972291075717479
+        },
+        {
+          "predictor": "bonds_zb_ofi",
+          "lag_seconds": 30,
+          "n": 2330,
+          "pearson_r": 0.17792304204184642,
+          "abs_r": 0.17792304204184642,
+          "t_stat": 8.723866015148975
+        }
+      ],
+      "best_by_predictor": [
+        {
+          "predictor": "cross_es_nq",
+          "lag_seconds": 0,
+          "n": 2360,
+          "pearson_r": 0.48551816422760835,
+          "abs_r": 0.48551816422760835,
+          "t_stat": 26.968287934065447
+        },
+        {
+          "predictor": "target_ofi_300s_z",
+          "lag_seconds": 180,
+          "n": 2199,
+          "pearson_r": 0.23546576070776493,
+          "abs_r": 0.23546576070776493,
+          "t_stat": 11.356093678072058
+        },
+        {
+          "predictor": "bonds_zn_ofi_lag30",
+          "lag_seconds": 15,
+          "n": 2320,
+          "pearson_r": -0.22711785700400144,
+          "abs_r": 0.22711785700400144,
+          "t_stat": -11.228150439771476
+        },
+        {
+          "predictor": "bonds_zn_ofi",
+          "lag_seconds": 15,
+          "n": 2344,
+          "pearson_r": -0.21920944771232603,
+          "abs_r": 0.21920944771232603,
+          "t_stat": -10.872922155996408
+        },
+        {
+          "predictor": "bonds_zb_ofi_lag30",
+          "lag_seconds": 15,
+          "n": 2320,
+          "pearson_r": 0.1916941658877476,
+          "abs_r": 0.1916941658877476,
+          "t_stat": 9.40362599945104
+        },
+        {
+          "predictor": "bonds_zb_ofi",
+          "lag_seconds": 15,
+          "n": 2343,
+          "pearson_r": 0.1881762449799636,
+          "abs_r": 0.1881762449799636,
+          "t_stat": 9.270308663086704
+        },
+        {
+          "predictor": "cross_rty_lag30",
+          "lag_seconds": 15,
+          "n": 2320,
+          "pearson_r": 0.1875346248056999,
+          "abs_r": 0.1875346248056999,
+          "t_stat": 9.192054873766248
+        },
+        {
+          "predictor": "cross_rty",
+          "lag_seconds": 15,
+          "n": 2347,
+          "pearson_r": 0.16523081820683166,
+          "abs_r": 0.16523081820683166,
+          "t_stat": 8.112847119948908
+        },
+        {
+          "predictor": "oil_cl_ofi_lag30",
+          "lag_seconds": 15,
+          "n": 2320,
+          "pearson_r": -0.15829614938170264,
+          "abs_r": 0.15829614938170264,
+          "t_stat": -7.718583435857979
+        },
+        {
+          "predictor": "oil_cl_ofi",
+          "lag_seconds": 15,
+          "n": 2346,
+          "pearson_r": -0.15558302608766386,
+          "abs_r": 0.15558302608766386,
+          "t_stat": -7.62538829781874
+        },
+        {
+          "predictor": "macro_regime_score",
+          "lag_seconds": 60,
+          "n": 2309,
+          "pearson_r": -0.09599710068161398,
+          "abs_r": 0.09599710068161398,
+          "t_stat": -4.632253301942017
+        },
+        {
+          "predictor": "macro_lead_score",
+          "lag_seconds": 15,
+          "n": 2348,
+          "pearson_r": -0.09555236479713178,
+          "abs_r": 0.09555236479713178,
+          "t_stat": -4.649402657724741
+        },
+        {
+          "predictor": "cross_ym",
+          "lag_seconds": 30,
+          "n": 2334,
+          "pearson_r": 0.08777843663725066,
+          "abs_r": 0.08777843663725066,
+          "t_stat": 4.255315104772537
+        },
+        {
+          "predictor": "cross_ym_lag30",
+          "lag_seconds": 5,
+          "n": 2329,
+          "pearson_r": 0.07638949105649,
+          "abs_r": 0.07638949105649,
+          "t_stat": 3.6957505552469243
+        },
+        {
+          "predictor": "cross_es_nq_lag30",
+          "lag_seconds": 300,
+          "n": 1796,
+          "pearson_r": -0.061973599226856184,
+          "abs_r": 0.061973599226856184,
+          "t_stat": -2.629986672089875
+        },
+        {
+          "predictor": "cross_index_balance",
+          "lag_seconds": 300,
+          "n": 2110,
+          "pearson_r": -0.05329861882211612,
+          "abs_r": 0.05329861882211612,
+          "t_stat": -2.4505806245010997
+        },
+        {
+          "predictor": "cross_index_lead_balance",
+          "lag_seconds": 300,
+          "n": 2110,
+          "pearson_r": 0.05277939456011994,
+          "abs_r": 0.05277939456011994,
+          "t_stat": 2.4266405513722638
+        },
+        {
+          "predictor": "target_ofi_60s_z",
+          "lag_seconds": 0,
+          "n": 2351,
+          "pearson_r": -0.052282045115194783,
+          "abs_r": 0.052282045115194783,
+          "t_stat": -2.5373971137885167
+        },
+        {
+          "predictor": "gold_gc_ofi_lag30",
+          "lag_seconds": 15,
+          "n": 2320,
+          "pearson_r": -0.046526629154500176,
+          "abs_r": 0.046526629154500176,
+          "t_stat": -2.242481552152364
+        },
+        {
+          "predictor": "target_ofi_15s_z",
+          "lag_seconds": 180,
+          "n": 2199,
+          "pearson_r": 0.0438404263923257,
+          "abs_r": 0.0438404263923257,
+          "t_stat": 2.0568733573232603
+        },
+        {
+          "predictor": "gold_gc_ofi",
+          "lag_seconds": 0,
+          "n": 2358,
+          "pearson_r": -0.04103999422489763,
+          "abs_r": 0.04103999422489763,
+          "t_stat": -1.993705373510513
+        }
+      ]
+    },
+    "NQ_10m": {
+      "rows": 2103,
+      "lags_seconds": [
+        0,
+        5,
+        15,
+        30,
+        60,
+        120,
+        180,
+        300
+      ],
+      "top_overall": [
+        {
+          "predictor": "cross_es_nq",
+          "lag_seconds": 180,
+          "n": 1950,
+          "pearson_r": 0.5987109622459433,
+          "abs_r": 0.5987109622459433,
+          "t_stat": 32.99119614713127
+        },
+        {
+          "predictor": "cross_es_nq",
+          "lag_seconds": 120,
+          "n": 1999,
+          "pearson_r": 0.5884144478079459,
+          "abs_r": 0.5884144478079459,
+          "t_stat": 32.5207374464303
+        },
+        {
+          "predictor": "cross_es_nq",
+          "lag_seconds": 5,
+          "n": 2097,
+          "pearson_r": 0.5547584687042798,
+          "abs_r": 0.5547584687042798,
+          "t_stat": 30.51874390943474
+        },
+        {
+          "predictor": "cross_es_nq",
+          "lag_seconds": 0,
+          "n": 2102,
+          "pearson_r": 0.5532205668937825,
+          "abs_r": 0.5532205668937825,
+          "t_stat": 30.433003226957226
+        },
+        {
+          "predictor": "cross_es_nq",
+          "lag_seconds": 15,
+          "n": 2089,
+          "pearson_r": 0.5456750586308186,
+          "abs_r": 0.5456750586308186,
+          "t_stat": 29.747668909032843
+        },
+        {
+          "predictor": "cross_es_nq",
+          "lag_seconds": 30,
+          "n": 2076,
+          "pearson_r": 0.5456372287823587,
+          "abs_r": 0.5456372287823587,
+          "t_stat": 29.65194704337904
+        },
+        {
+          "predictor": "cross_es_nq",
+          "lag_seconds": 60,
+          "n": 2050,
+          "pearson_r": 0.5316112064273852,
+          "abs_r": 0.5316112064273852,
+          "t_stat": 28.40413629641501
+        },
+        {
+          "predictor": "cross_es_nq",
+          "lag_seconds": 300,
+          "n": 1851,
+          "pearson_r": 0.405695071323068,
+          "abs_r": 0.405695071323068,
+          "t_stat": 19.08613362933124
+        },
+        {
+          "predictor": "target_ofi_300s_z",
+          "lag_seconds": 300,
+          "n": 1842,
+          "pearson_r": 0.29923414277138,
+          "abs_r": 0.29923414277138,
+          "t_stat": 13.452093501653945
+        },
+        {
+          "predictor": "target_ofi_300s_z",
+          "lag_seconds": 0,
+          "n": 2093,
+          "pearson_r": 0.27018867074143793,
+          "abs_r": 0.27018867074143793,
+          "t_stat": 12.832306768236887
+        },
+        {
+          "predictor": "target_ofi_300s_z",
+          "lag_seconds": 5,
+          "n": 2088,
+          "pearson_r": 0.2640078719943486,
+          "abs_r": 0.2640078719943486,
+          "t_stat": 12.501512360921636
+        },
+        {
+          "predictor": "target_ofi_300s_z",
+          "lag_seconds": 15,
+          "n": 2079,
+          "pearson_r": 0.2591885054251921,
+          "abs_r": 0.2591885054251921,
+          "t_stat": 12.230233656181518
+        },
+        {
+          "predictor": "target_ofi_300s_z",
+          "lag_seconds": 180,
+          "n": 1941,
+          "pearson_r": 0.24514720821630923,
+          "abs_r": 0.24514720821630923,
+          "t_stat": 11.134593690448806
+        },
+        {
+          "predictor": "target_ofi_300s_z",
+          "lag_seconds": 30,
+          "n": 2066,
+          "pearson_r": 0.23414948900182353,
+          "abs_r": 0.23414948900182353,
+          "t_stat": 10.941885698162908
+        },
+        {
+          "predictor": "bonds_zn_ofi",
+          "lag_seconds": 0,
+          "n": 2099,
+          "pearson_r": -0.2259978539065163,
+          "abs_r": 0.2259978539065163,
+          "t_stat": -10.62398852387324
+        },
+        {
+          "predictor": "bonds_zn_ofi",
+          "lag_seconds": 5,
+          "n": 2094,
+          "pearson_r": -0.22105123160616486,
+          "abs_r": 0.22105123160616486,
+          "t_stat": -10.366983052291074
+        },
+        {
+          "predictor": "bonds_zn_ofi",
+          "lag_seconds": 15,
+          "n": 2086,
+          "pearson_r": -0.2201422932151029,
+          "abs_r": 0.2201422932151029,
+          "t_stat": -10.302423983766289
+        },
+        {
+          "predictor": "bonds_zn_ofi_lag30",
+          "lag_seconds": 15,
+          "n": 2062,
+          "pearson_r": -0.20191885273257804,
+          "abs_r": 0.20191885273257804,
+          "t_stat": -9.357274730654236
+        },
+        {
+          "predictor": "bonds_zn_ofi_lag30",
+          "lag_seconds": 0,
+          "n": 2076,
+          "pearson_r": -0.20072579928674777,
+          "abs_r": 0.20072579928674777,
+          "t_stat": -9.331205489413756
+        },
+        {
+          "predictor": "bonds_zn_ofi",
+          "lag_seconds": 30,
+          "n": 2073,
+          "pearson_r": -0.19935299099442444,
+          "abs_r": 0.19935299099442444,
+          "t_stat": -9.258033573381807
+        },
+        {
+          "predictor": "bonds_zn_ofi_lag30",
+          "lag_seconds": 30,
+          "n": 2050,
+          "pearson_r": -0.19672681852169335,
+          "abs_r": 0.19672681852169335,
+          "t_stat": -9.080283312843873
+        },
+        {
+          "predictor": "bonds_zn_ofi",
+          "lag_seconds": 60,
+          "n": 2047,
+          "pearson_r": -0.19639098320286155,
+          "abs_r": 0.19639098320286155,
+          "t_stat": -9.057518596827759
+        },
+        {
+          "predictor": "bonds_zb_ofi",
+          "lag_seconds": 0,
+          "n": 2098,
+          "pearson_r": 0.19438120363155123,
+          "abs_r": 0.19438120363155123,
+          "t_stat": 9.072221203496287
+        },
+        {
+          "predictor": "bonds_zn_ofi_lag30",
+          "lag_seconds": 5,
+          "n": 2071,
+          "pearson_r": -0.19220980257302123,
+          "abs_r": 0.19220980257302123,
+          "t_stat": -8.90902431919407
+        },
+        {
+          "predictor": "bonds_zb_ofi",
+          "lag_seconds": 15,
+          "n": 2085,
+          "pearson_r": 0.18919911827188748,
+          "abs_r": 0.18919911827188748,
+          "t_stat": 8.793855958233173
+        },
+        {
+          "predictor": "bonds_zb_ofi",
+          "lag_seconds": 5,
+          "n": 2093,
+          "pearson_r": 0.18799991871368818,
+          "abs_r": 0.18799991871368818,
+          "t_stat": 8.752828841450116
+        },
+        {
+          "predictor": "bonds_zn_ofi",
+          "lag_seconds": 300,
+          "n": 1848,
+          "pearson_r": -0.17857148355754063,
+          "abs_r": 0.17857148355754063,
+          "t_stat": -7.797674508695951
+        },
+        {
+          "predictor": "target_ofi_300s_z",
+          "lag_seconds": 60,
+          "n": 2041,
+          "pearson_r": 0.17665946882608757,
+          "abs_r": 0.17665946882608757,
+          "t_stat": 8.104577667477148
+        },
+        {
+          "predictor": "bonds_zb_ofi_lag30",
+          "lag_seconds": 0,
+          "n": 2076,
+          "pearson_r": 0.17267754898082385,
+          "abs_r": 0.17267754898082385,
+          "t_stat": 7.983871553907723
+        },
+        {
+          "predictor": "bonds_zn_ofi_lag30",
+          "lag_seconds": 300,
+          "n": 1827,
+          "pearson_r": -0.17159334946590993,
+          "abs_r": 0.17159334946590993,
+          "t_stat": -7.440834564597268
+        }
+      ],
+      "best_by_predictor": [
+        {
+          "predictor": "cross_es_nq",
+          "lag_seconds": 180,
+          "n": 1950,
+          "pearson_r": 0.5987109622459433,
+          "abs_r": 0.5987109622459433,
+          "t_stat": 32.99119614713127
+        },
+        {
+          "predictor": "target_ofi_300s_z",
+          "lag_seconds": 300,
+          "n": 1842,
+          "pearson_r": 0.29923414277138,
+          "abs_r": 0.29923414277138,
+          "t_stat": 13.452093501653945
+        },
+        {
+          "predictor": "bonds_zn_ofi",
+          "lag_seconds": 0,
+          "n": 2099,
+          "pearson_r": -0.2259978539065163,
+          "abs_r": 0.2259978539065163,
+          "t_stat": -10.62398852387324
+        },
+        {
+          "predictor": "bonds_zn_ofi_lag30",
+          "lag_seconds": 15,
+          "n": 2062,
+          "pearson_r": -0.20191885273257804,
+          "abs_r": 0.20191885273257804,
+          "t_stat": -9.357274730654236
+        },
+        {
+          "predictor": "bonds_zb_ofi",
+          "lag_seconds": 0,
+          "n": 2098,
+          "pearson_r": 0.19438120363155123,
+          "abs_r": 0.19438120363155123,
+          "t_stat": 9.072221203496287
+        },
+        {
+          "predictor": "bonds_zb_ofi_lag30",
+          "lag_seconds": 0,
+          "n": 2076,
+          "pearson_r": 0.17267754898082385,
+          "abs_r": 0.17267754898082385,
+          "t_stat": 7.983871553907723
+        },
+        {
+          "predictor": "cross_rty_lag30",
+          "lag_seconds": 0,
+          "n": 2076,
+          "pearson_r": 0.1714738655575825,
+          "abs_r": 0.1714738655575825,
+          "t_stat": 7.926526322007823
+        },
+        {
+          "predictor": "cross_rty",
+          "lag_seconds": 15,
+          "n": 2089,
+          "pearson_r": 0.16787328058481815,
+          "abs_r": 0.16787328058481815,
+          "t_stat": 7.779473524765272
+        },
+        {
+          "predictor": "oil_cl_ofi",
+          "lag_seconds": 15,
+          "n": 2088,
+          "pearson_r": -0.16189465468147007,
+          "abs_r": 0.16189465468147007,
+          "t_stat": -7.49302151640697
+        },
+        {
+          "predictor": "oil_cl_ofi_lag30",
+          "lag_seconds": 0,
+          "n": 2076,
+          "pearson_r": -0.14027594443185287,
+          "abs_r": 0.14027594443185287,
+          "t_stat": -6.452129222493463
+        },
+        {
+          "predictor": "target_ofi_60s_z",
+          "lag_seconds": 300,
+          "n": 1842,
+          "pearson_r": 0.13360320413020546,
+          "abs_r": 0.13360320413020546,
+          "t_stat": 5.7827821803288
+        },
+        {
+          "predictor": "macro_lead_score",
+          "lag_seconds": 300,
+          "n": 1852,
+          "pearson_r": 0.12126465746048329,
+          "abs_r": 0.12126465746048329,
+          "t_stat": 5.254567736691467
+        },
+        {
+          "predictor": "macro_regime_score",
+          "lag_seconds": 300,
+          "n": 1852,
+          "pearson_r": 0.11714955641524896,
+          "abs_r": 0.11714955641524896,
+          "t_stat": 5.073729203337666
+        },
+        {
+          "predictor": "cross_es_nq_lag30",
+          "lag_seconds": 60,
+          "n": 1754,
+          "pearson_r": -0.11173683631048176,
+          "abs_r": 0.11173683631048176,
+          "t_stat": -4.706429933527742
+        },
+        {
+          "predictor": "cross_ym",
+          "lag_seconds": 30,
+          "n": 2076,
+          "pearson_r": 0.0832109861538635,
+          "abs_r": 0.0832109861538635,
+          "t_stat": 3.802715341268071
+        },
+        {
+          "predictor": "cross_ym_lag30",
+          "lag_seconds": 0,
+          "n": 2076,
+          "pearson_r": 0.07313318167071321,
+          "abs_r": 0.07313318167071321,
+          "t_stat": 3.339514740127166
+        },
+        {
+          "predictor": "cross_index_balance",
+          "lag_seconds": 300,
+          "n": 1852,
+          "pearson_r": -0.05394701451313026,
+          "abs_r": 0.05394701451313026,
+          "t_stat": -2.3237326506644083
+        },
+        {
+          "predictor": "gold_gc_ofi",
+          "lag_seconds": 300,
+          "n": 1849,
+          "pearson_r": -0.04928388971368835,
+          "abs_r": 0.04928388971368835,
+          "t_stat": -2.1206377868265816
+        },
+        {
+          "predictor": "cross_index_lead_balance",
+          "lag_seconds": 30,
+          "n": 2077,
+          "pearson_r": 0.04868407250828034,
+          "abs_r": 0.04868407250828034,
+          "t_stat": 2.220297812802235
+        },
+        {
+          "predictor": "gold_gc_ofi_lag30",
+          "lag_seconds": 15,
+          "n": 2062,
+          "pearson_r": -0.04538652076511551,
+          "abs_r": 0.04538652076511551,
+          "t_stat": -2.06209311843273
+        },
+        {
+          "predictor": "target_ofi_15s_z",
+          "lag_seconds": 300,
+          "n": 1842,
+          "pearson_r": 0.04516338754141626,
+          "abs_r": 0.04516338754141626,
+          "t_stat": 1.9392723048338705
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,5 @@
+.env
+.venv/
+.pytest_cache/
+logs/
+data/*.jsonl
