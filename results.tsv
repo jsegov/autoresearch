@@ -1,0 +1,7 @@
+commit	val_bpb	memory_gb	status	description
+a4123c6	0.583630	0.4	keep	baseline: depth=4 dim=256 seq=512 batch=4
+a4123c6	0.569662	1.2	keep	increase compatibility microbatch 4->16
+a4123c6	0.585515	1.6	discard	disable activation checkpointing
+a4123c6	0.578222	1.2	discard	verification rerun of microbatch 16
+98890c4	0.584346	1.2	discard	add 5% LR warmup
+98890c4	0.574560	1.2	discard	increase warmdown 0.5->0.7

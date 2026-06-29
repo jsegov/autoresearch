@@ -798,10 +798,10 @@ class MuonAdamW(torch.optim.Optimizer):
 # Model architecture
 ASPECT_RATIO = 64         # model_dim = depth * ASPECT_RATIO
 HEAD_DIM = 128            # target head dimension for attention
-WINDOW_PATTERN = "SSSL"   # sliding window pattern: L=full, S=half context
+WINDOW_PATTERN = "L"      # RTX 3050 6GB: "L" only (SSSL banded attention too slow on small VRAM)
 
 # Optimization
-TOTAL_BATCH_SIZE = 2 ** 19
+TOTAL_BATCH_SIZE = 2 ** 14  # RTX 3050 6GB: reduced from 2**19 to fit 6 GB VRAM (16384 tokens/step)
 EMBEDDING_LR = 0.6
 UNEMBEDDING_LR = 0.004
 MATRIX_LR = 0.04
@@ -813,9 +813,9 @@ WARMDOWN_RATIO = 0.5
 FINAL_LR_FRAC = 0.0
 
 # Model size + memory defaults
-DEPTH = 8
-DEVICE_BATCH_SIZE = 16
-EVAL_BATCH_SIZE = 8
+DEPTH = 4              # RTX 3050 6GB: reduced from 8 to fit 6 GB VRAM
+DEVICE_BATCH_SIZE = 16  # RTX 3050 6GB: try larger microbatch now that seq/depth are reduced
+EVAL_BATCH_SIZE = 4    # RTX 3050 6GB: reduced from 8
 
 
 def build_model_config(depth, vocab_size, runtime, use_activation_checkpointing=None):

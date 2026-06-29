@@ -27,9 +27,9 @@ import torch
 # Constants (fixed, do not modify)
 # ---------------------------------------------------------------------------
 
-MAX_SEQ_LEN = 2048          # context length
+MAX_SEQ_LEN = 512           # RTX 3050 6GB: reduced from 2048 to fit 6 GB VRAM
 TIME_BUDGET = 300           # training time budget in seconds (5 minutes)
-EVAL_TOKENS = 40 * 524288   # number of tokens for validation eval
+EVAL_TOKENS = 5 * 524288    # RTX 3050 6GB: reduced from 40x to 5x (2.6M tokens) for 6 GB VRAM
 VOCAB_SIZE = 8192
 
 # BPE split pattern (GPT-4 style, with \p{N}{1,2} instead of {1,3})
