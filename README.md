@@ -70,6 +70,35 @@ Hi have a look at program.md and let's kick off a new experiment! let's do the s
 
 The `program.md` file is essentially a super lightweight "skill".
 
+## Cloud research loop (experimental)
+
+The provider-neutral cloud loop separates three responsibilities:
+
+- **Linkup web search** produces sourced, machine-readable experiment candidates.
+- **Hermes** ranks candidates, edits `train.py`, reacts to failures, and retains campaign memory.
+- **A dedicated cloud GPU** runs the fixed training/evaluation contract and emits immutable JSON
+  results with Git and GPU metadata.
+
+Start with one persistent cloud GPU and keep the GPU type fixed for the entire campaign. See
+[`docs/cloud-research-loop.md`](docs/cloud-research-loop.md) for worker setup and
+[`skills/autoresearch-cloud/SKILL.md`](skills/autoresearch-cloud/SKILL.md) for the Hermes procedure.
+
+Generate sourced candidates:
+
+```bash
+uv run --frozen python -m cloud.websearch \
+  --objective "Lower TinyStories validation BPB on one 24 GB GPU" \
+  --hardware "one RTX 4090 with 24 GB VRAM" \
+  --output queue/candidates.json
+```
+
+Run a structured baseline:
+
+```bash
+uv run --frozen python -m cloud.experiment \
+  --id baseline --description "unmodified cloud baseline"
+```
+
 ## Project structure
 
 ```
@@ -77,6 +106,9 @@ prepare.py      — constants, data prep + runtime utilities (do not modify)
 train.py        — model, optimizer, training loop (agent modifies this)
 program.md      — agent instructions
 pyproject.toml  — dependencies
+cloud/          — sourced web search + immutable cloud experiment runner
+skills/         — reusable Hermes campaign procedure
+docs/           — cloud deployment and operations guide
 ```
 
 ## Design choices

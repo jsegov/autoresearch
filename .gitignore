@@ -18,3 +18,10 @@ AGENTS.md
 
 # Experimental code/artifacts
 dev/
+run.log
+checkpoint*.pt
+
+# Local credentials
+.env
+.env.*
+!.env.example
