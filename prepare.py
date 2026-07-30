@@ -11,6 +11,7 @@ AUTORESEARCH_DATASET or by running this script with --dataset.
 """
 
 import argparse
+import copy
 import math
 import os
 import pickle
@@ -28,15 +29,31 @@ import torch
 # ---------------------------------------------------------------------------
 
 MAX_SEQ_LEN = 2048          # context length
-TIME_BUDGET = 300           # training time budget in seconds (5 minutes)
+TIME_BUDGET = 600           # training time budget in seconds (10 minutes)
 EVAL_TOKENS = 40 * 524288   # number of tokens for validation eval
-VOCAB_SIZE = 8192
+# Half of nanochat's default 32K vocabulary. This includes the special tokens
+# below, so the BPE mergeable vocabulary is slightly smaller.
+VOCAB_SIZE = 16384
 
 # BPE split pattern (GPT-4 style, with \p{N}{1,2} instead of {1,3})
 SPLIT_PATTERN = r"""'(?i:[sdmt]|ll|ve|re)|[^\r\n\p{L}\p{N}]?+\p{L}+|\p{N}{1,2}| ?[^\s\p{L}\p{N}]++[\r\n]*|\s*[\r\n]|\s+(?!\S)|\s+"""
 
-SPECIAL_TOKENS = [f"<|reserved_{i}|>" for i in range(4)]
-BOS_TOKEN = "<|reserved_0|>"
+# Keep these token names and their order aligned with nanochat. In addition to
+# marking document boundaries during pretraining, they define the stable wire
+# format used by future supervised fine-tuning and tool-use data.
+SPECIAL_TOKENS = [
+    "<|bos|>",
+    "<|user_start|>",
+    "<|user_end|>",
+    "<|assistant_start|>",
+    "<|assistant_end|>",
+    "<|python_start|>",
+    "<|python_end|>",
+    "<|output_start|>",
+    "<|output_end|>",
+]
+BOS_TOKEN = "<|bos|>"
+TOKENIZER_FORMAT_VERSION = 2
 
 # ---------------------------------------------------------------------------
 # Dataset + cache configuration
@@ -286,10 +303,18 @@ def train_tokenizer(dataset_name=None):
     tokenizer_dir = _tokenizer_dir(dataset)
     tokenizer_pkl = os.path.join(tokenizer_dir, "tokenizer.pkl")
     token_bytes_path = os.path.join(tokenizer_dir, "token_bytes.pt")
+    metadata_path = os.path.join(tokenizer_dir, "metadata.pt")
 
-    if os.path.exists(tokenizer_pkl) and os.path.exists(token_bytes_path):
-        print(f"Tokenizer: already trained at {tokenizer_dir}")
-        return
+    if all(os.path.exists(path) for path in (tokenizer_pkl, token_bytes_path, metadata_path)):
+        metadata = torch.load(metadata_path, map_location="cpu", weights_only=True)
+        if (
+            metadata.get("format_version") == TOKENIZER_FORMAT_VERSION
+            and metadata.get("vocab_size") == VOCAB_SIZE
+            and metadata.get("special_tokens") == SPECIAL_TOKENS
+        ):
+            print(f"Tokenizer: already trained at {tokenizer_dir}")
+            return
+        print("Tokenizer: cached tokenizer format is outdated; retraining.")
 
     os.makedirs(tokenizer_dir, exist_ok=True)
 
@@ -326,20 +351,29 @@ def train_tokenizer(dataset_name=None):
     print(f"Tokenizer: trained in {t1 - t0:.1f}s, saved to {tokenizer_pkl}")
 
     print("Tokenizer: building token_bytes lookup...")
-    special_set = set(SPECIAL_TOKENS)
+    special_token_ids = {enc.encode_single_token(token) for token in SPECIAL_TOKENS}
     token_bytes_list = []
     for token_id in range(enc.n_vocab):
-        token_str = enc.decode([token_id])
-        if token_str in special_set:
+        if token_id in special_token_ids:
             token_bytes_list.append(0)
         else:
-            token_bytes_list.append(len(token_str.encode("utf-8")))
+            # Decoding invalid standalone UTF-8 bytes to text would corrupt
+            # their byte count. BPB must use the raw token representation.
+            token_bytes_list.append(len(enc.decode_single_token_bytes(token_id)))
     token_bytes_tensor = torch.tensor(token_bytes_list, dtype=torch.int32)
     torch.save(token_bytes_tensor, token_bytes_path)
     print(f"Tokenizer: saved token_bytes to {token_bytes_path}")
 
     with open(os.path.join(tokenizer_dir, "dataset.txt"), "w", encoding="utf-8") as f:
         f.write(dataset + "\n")
+    torch.save(
+        {
+            "format_version": TOKENIZER_FORMAT_VERSION,
+            "vocab_size": VOCAB_SIZE,
+            "special_tokens": SPECIAL_TOKENS,
+        },
+        metadata_path,
+    )
 
     test = "Hello world! Numbers: 123. Unicode: 你好"
     encoded = enc.encode_ordinary(test)
@@ -353,7 +387,7 @@ def train_tokenizer(dataset_name=None):
 # ---------------------------------------------------------------------------
 
 class Tokenizer:
-    """Minimal tokenizer wrapper. Training is handled above."""
+    """GPT-4-style BPE tokenizer with nanochat-compatible chat rendering."""
 
     def __init__(self, enc, dataset):
         self.enc = enc
@@ -366,6 +400,13 @@ class Tokenizer:
         resolved_dir = tokenizer_dir if tokenizer_dir is not None else _tokenizer_dir(dataset_name)
         with open(os.path.join(resolved_dir, "tokenizer.pkl"), "rb") as f:
             enc = pickle.load(f)
+        expected_special_ids = list(range(VOCAB_SIZE - len(SPECIAL_TOKENS), VOCAB_SIZE))
+        actual_special_ids = [enc.encode_single_token(token) for token in SPECIAL_TOKENS]
+        if enc.n_vocab != VOCAB_SIZE or actual_special_ids != expected_special_ids:
+            raise RuntimeError(
+                "Cached tokenizer is incompatible with this checkout. "
+                "Run `uv run prepare.py` to retrain it."
+            )
         return cls(enc, dataset=dataset_name)
 
     def get_vocab_size(self):
@@ -374,24 +415,107 @@ class Tokenizer:
     def get_bos_token_id(self):
         return self.bos_token_id
 
-    def encode(self, text, prepend=None, num_threads=8):
+    def get_special_tokens(self):
+        return self.enc.special_tokens_set
+
+    def encode_special(self, text):
+        return self.enc.encode_single_token(text)
+
+    def encode(self, text, prepend=None, append=None, num_threads=8):
         if prepend is not None:
-            prepend_id = prepend if isinstance(prepend, int) else self.enc.encode_single_token(prepend)
+            prepend_id = prepend if isinstance(prepend, int) else self.encode_special(prepend)
+        if append is not None:
+            append_id = append if isinstance(append, int) else self.encode_special(append)
         if isinstance(text, str):
             ids = self.enc.encode_ordinary(text)
             if prepend is not None:
                 ids.insert(0, prepend_id)
+            if append is not None:
+                ids.append(append_id)
         elif isinstance(text, list):
             ids = self.enc.encode_ordinary_batch(text, num_threads=num_threads)
             if prepend is not None:
                 for row in ids:
                     row.insert(0, prepend_id)
+            if append is not None:
+                for row in ids:
+                    row.append(append_id)
         else:
             raise ValueError(f"Invalid input type: {type(text)}")
         return ids
 
     def decode(self, ids):
         return self.enc.decode(ids)
+
+    def decode_single_token_bytes(self, token_id):
+        return self.enc.decode_single_token_bytes(token_id)
+
+    def render_conversation(self, conversation, max_tokens=2048):
+        """Render nanochat-format messages and return token ids plus SFT mask."""
+        messages = conversation["messages"]
+        if messages and messages[0]["role"] == "system":
+            if len(messages) < 2 or messages[1]["role"] != "user":
+                raise ValueError("System message must be followed by a user message.")
+            messages = copy.deepcopy(messages)
+            messages[1]["content"] = messages[0]["content"] + "\n\n" + messages[1]["content"]
+            messages = messages[1:]
+        if not messages:
+            raise ValueError("Conversation has no messages.")
+
+        special = {token: self.encode_special(token) for token in SPECIAL_TOKENS}
+        ids, mask = [special[BOS_TOKEN]], [0]
+
+        def add(token_ids, supervised):
+            if isinstance(token_ids, int):
+                token_ids = [token_ids]
+            ids.extend(token_ids)
+            mask.extend([supervised] * len(token_ids))
+
+        for index, message in enumerate(messages):
+            expected_role = "user" if index % 2 == 0 else "assistant"
+            if message["role"] != expected_role:
+                raise ValueError(f"Message {index} must be from {expected_role}.")
+            content = message["content"]
+            if expected_role == "user":
+                if not isinstance(content, str):
+                    raise ValueError("User message content must be a string.")
+                add(special["<|user_start|>"], 0)
+                add(self.encode(content), 0)
+                add(special["<|user_end|>"], 0)
+                continue
+
+            add(special["<|assistant_start|>"], 0)
+            parts = [{"type": "text", "text": content}] if isinstance(content, str) else content
+            if not isinstance(parts, list):
+                raise ValueError("Assistant message content must be a string or list of parts.")
+            for part in parts:
+                part_type, value_ids = part["type"], self.encode(part["text"])
+                if part_type == "text":
+                    add(value_ids, 1)
+                elif part_type == "python":
+                    add(special["<|python_start|>"], 1)
+                    add(value_ids, 1)
+                    add(special["<|python_end|>"], 1)
+                elif part_type == "python_output":
+                    add(special["<|output_start|>"], 0)
+                    add(value_ids, 0)
+                    add(special["<|output_end|>"], 0)
+                else:
+                    raise ValueError(f"Unknown assistant part type: {part_type}")
+            add(special["<|assistant_end|>"], 1)
+
+        return ids[:max_tokens], mask[:max_tokens]
+
+    def render_for_completion(self, conversation):
+        """Render a conversation ending immediately before an assistant reply."""
+        conversation = copy.deepcopy(conversation)
+        messages = conversation["messages"]
+        if not messages or messages[-1]["role"] != "assistant":
+            raise ValueError("Last message must be from the assistant.")
+        messages.pop()
+        ids, _ = self.render_conversation(conversation)
+        ids.append(self.encode_special("<|assistant_start|>"))
+        return ids
 
 
 def get_token_bytes(device="cpu", dataset=None):

@@ -5,17 +5,37 @@ Usage: uv run train.py
 """
 
 import argparse
+import datetime
 import gc
 import json
 import os
 import platform
 import time
+import uuid
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
 os.environ.setdefault("PYTORCH_ALLOC_CONF", "expandable_segments:True")
 os.environ.setdefault("HF_HUB_DISABLE_PROGRESS_BARS", "1")
 
+
+def _load_dotenv():
+    """Minimal .env loader (no extra dependency)."""
+    env_path = Path(__file__).parent / ".env"
+    if not env_path.exists():
+        return
+    for line in env_path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if "=" in line:
+            key, _, value = line.partition("=")
+            os.environ.setdefault(key.strip(), value.strip())
+
+
+_load_dotenv()
+
+import requests
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -1050,11 +1070,398 @@ def _configure_step_kernels(runtime):
     USE_COMPILE = False
 
 
+# ---------------------------------------------------------------------------
+# Integration: TensorBoard, HuggingFace, ai-research-keeper
+# ---------------------------------------------------------------------------
+
+
+def _make_run_id():
+    return datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + "-" + uuid.uuid4().hex[:6]
+
+
+def _init_wandb(run_id, config_dict):
+    """Initialize a wandb run. Returns the run object or None."""
+    try:
+        import wandb
+
+        wandb_key = os.environ.get("WANDB_API_KEY")
+        if not wandb_key:
+            print("WANDB_API_KEY not set, skipping wandb")
+            return None
+
+        run = wandb.init(
+            project="autoresearch",
+            name=run_id,
+            config=config_dict,
+            resume="allow",
+        )
+        print(f"WandB: run_id={run.id}, url={run.url}")
+        return run
+    except Exception as exc:
+        print(f"WandB init failed (non-fatal): {exc}")
+        return None
+
+
+def _wandb_log(run, metrics, step):
+    if run is not None:
+        try:
+            run.log(metrics, step=step)
+        except Exception:
+            pass
+
+
+def _wandb_finish(run):
+    if run is not None:
+        try:
+            run.finish()
+        except Exception:
+            pass
+
+
+def _hf_upload_model(run_id, checkpoint_path, val_bpb):
+    """Upload checkpoint to HuggingFace. Returns repo URL or None."""
+    try:
+        from huggingface_hub import HfApi
+
+        hf_token = os.environ.get("HF_TOKEN")
+        if not hf_token:
+            print("HF_TOKEN not set, skipping HuggingFace upload")
+            return None
+
+        api = HfApi(token=hf_token)
+        repo_name = f"autoresearch-{run_id}-bpb{val_bpb:.3f}"
+        repo_id = f"quik-models/{repo_name}"
+
+        api.create_repo(repo_id=repo_id, exist_ok=True, repo_type="model")
+        api.upload_file(
+            path_or_fileobj=str(checkpoint_path),
+            path_in_repo="model.pt",
+            repo_id=repo_id,
+            repo_type="model",
+        )
+        url = f"https://huggingface.co/{repo_id}"
+        print(f"HuggingFace: uploaded model to {url}")
+        return url
+    except Exception as exc:
+        print(f"HuggingFace model upload failed (non-fatal): {exc}")
+        return None
+
+
+def _hf_upload_tokenizer(run_id, tokenizer, val_bpb):
+    """Upload tokenizer.pkl to the same HuggingFace repo."""
+    try:
+        from huggingface_hub import HfApi
+
+        hf_token = os.environ.get("HF_TOKEN")
+        if not hf_token:
+            return None
+
+        api = HfApi(token=hf_token)
+        repo_name = f"autoresearch-{run_id}-bpb{val_bpb:.3f}"
+        repo_id = f"quik-models/{repo_name}"
+
+        # Find tokenizer.pkl from the cache
+        tokenizer_dir = os.path.join(
+            os.environ.get("AUTORESEARCH_CACHE_DIR", os.path.expanduser("~/.cache/autoresearch")),
+            "tokenizer",
+        )
+        tokenizer_pkl = os.path.join(tokenizer_dir, "tokenizer.pkl")
+        if not os.path.exists(tokenizer_pkl):
+            print(f"Tokenizer file not found at {tokenizer_pkl}, skipping tokenizer upload")
+            return None
+
+        api.upload_file(
+            path_or_fileobj=tokenizer_pkl,
+            path_in_repo="tokenizer.pkl",
+            repo_id=repo_id,
+            repo_type="model",
+        )
+        print(f"HuggingFace: uploaded tokenizer to {repo_id}")
+        return f"https://huggingface.co/{repo_id}"
+    except Exception as exc:
+        print(f"HuggingFace tokenizer upload failed (non-fatal): {exc}")
+        return None
+
+
+def _hf_upload_readme(run_id, val_bpb, metrics):
+    """Upload a boilerplate README.md to the HuggingFace repo."""
+    try:
+        from huggingface_hub import HfApi
+
+        hf_token = os.environ.get("HF_TOKEN")
+        if not hf_token:
+            return None
+
+        api = HfApi(token=hf_token)
+        repo_name = f"autoresearch-{run_id}-bpb{val_bpb:.3f}"
+        repo_id = f"quik-models/{repo_name}"
+
+        readme = f"""---
+language:
+  - en
+library_name: pytorch
+tags:
+  - autoresearch
+  - nanoGPT
+  - tinystories
+metrics:
+  - perplexity
+---
+
+# {repo_name}
+
+Autoresearch baseline model trained on TinyStories.
+
+## Results
+
+| Metric | Value |
+|---|---|
+| val_bpb | {metrics.get('val_bpb', 'N/A')} |
+| training_seconds | {metrics.get('training_seconds', 'N/A')} |
+| peak_vram_mb | {metrics.get('peak_vram_mb', 'N/A')} |
+| mfu_percent | {metrics.get('mfu_percent', 'N/A')} |
+| num_steps | {metrics.get('num_steps', 'N/A')} |
+| num_params | {metrics.get('num_params_M', 'N/A')}M |
+| total_tokens | {metrics.get('total_tokens_M', 'N/A')}M |
+
+## Usage
+
+```python
+import torch
+import pickle
+
+# Load model checkpoint
+model_data = torch.load("model.pt", map_location="cpu")
+
+# Load tokenizer
+with open("tokenizer.pkl", "rb") as f:
+    tokenizer = pickle.load(f)
+```
+
+## Training Details
+
+- **Dataset**: TinyStories (GPT-4 cleaned)
+- **Architecture**: GPT with RoPE, GQA, Value Embeddings, SDPA
+- **Optimizer**: MuonAdamW (Muon for 2D + AdamW for others)
+- **Sequence length**: 2048
+- **Vocab size**: 16,384
+- **Run ID**: {run_id}
+"""
+
+        api.upload_file(
+            path_or_fileobj=readme.encode("utf-8"),
+            path_in_repo="README.md",
+            repo_id=repo_id,
+            repo_type="model",
+        )
+        print(f"HuggingFace: uploaded README to {repo_id}")
+        return f"https://huggingface.co/{repo_id}"
+    except Exception as exc:
+        print(f"HuggingFace README upload failed (non-fatal): {exc}")
+        return None
+
+
+def _generate_report_md(run_id, val_bpb, metrics, config_dict, status="keep", reason="Baseline run"):
+    """Generate a REPORT.md string for the experiment."""
+
+    class _SafeEncoder(json.JSONEncoder):
+        def default(self, o):
+            try:
+                return str(o)
+            except Exception:
+                return super().default(o)
+
+    config_json = json.dumps(config_dict, indent=2, cls=_SafeEncoder)
+    report = f"""# Experiment Report: {run_id}
+
+## Status: {status.upper()}
+
+## Reason
+{reason}
+
+## Results
+
+| Metric | Value |
+|---|---|
+| val_bpb | {val_bpb:.6f} |
+| training_seconds | {metrics.get('training_seconds', 'N/A')} |
+| peak_vram_mb | {metrics.get('peak_vram_mb', 'N/A')} |
+| mfu_percent | {metrics.get('mfu_percent', 'N/A')} |
+| num_steps | {metrics.get('num_steps', 'N/A')} |
+| num_params | {metrics.get('num_params_M', 'N/A')}M |
+| total_tokens | {metrics.get('total_tokens_M', 'N/A')}M |
+
+## Model Config
+
+```json
+{config_json}
+```
+
+## Hyperparameters
+
+| Parameter | Value |
+|---|---|
+| depth | {config_dict.get('n_layer', 'N/A')} |
+| n_embd | {config_dict.get('n_embd', 'N/A')} |
+| n_head | {config_dict.get('n_head', 'N/A')} |
+| sequence_len | {config_dict.get('sequence_len', 'N/A')} |
+| vocab_size | {config_dict.get('vocab_size', 'N/A')} |
+| window_pattern | {config_dict.get('window_pattern', 'N/A')} |
+"""
+    return report
+
+
+def _ark_upload_report(ark, run_id, val_bpb, metrics, config_dict, status="keep", reason="Baseline run"):
+    """Generate and upload REPORT.md to ai-research-keeper."""
+    if not ark.enabled:
+        return
+    try:
+        report = _generate_report_md(run_id, val_bpb, metrics, config_dict, status, reason)
+        report_bytes = report.encode("utf-8")
+        endpoint = f"/experiments/{ark.experiment_id}/artifacts"
+        requests.post(
+            f"{ark.api}{endpoint}",
+            headers=ark.headers,
+            files={"file": ("REPORT.md", report_bytes, "text/markdown")},
+            data={"kind": "log", "name": "REPORT.md"},
+            timeout=30,
+        )
+        print(f"ARK: uploaded REPORT.md")
+    except Exception as exc:
+        print(f"ARK REPORT.md upload failed (non-fatal): {exc}")
+
+
+def _cleanup_artifacts():
+    """Delete checkpoint after uploads."""
+    ckpt = Path("checkpoint_pre_eval.pt")
+    if ckpt.exists():
+        ckpt.unlink()
+        print("Cleanup: removed checkpoint_pre_eval.pt")
+
+
+class _ARKClient:
+    """Minimal ai-research-keeper client."""
+
+    def __init__(self):
+        self.api = "https://ai-research-keeper.lovable.app/api/public/v1"
+        self.key = os.environ.get("RESEARCH_VAULT_KEY")
+        self.headers = {"Authorization": f"Bearer {self.key}"} if self.key else None
+        self.project_id = None
+        self.experiment_id = None
+
+    @property
+    def enabled(self):
+        return self.headers is not None
+
+    def _post(self, endpoint, json_data=None):
+        try:
+            r = requests.post(f"{self.api}{endpoint}", headers=self.headers, json=json_data, timeout=10)
+            r.raise_for_status()
+            return r.json()
+        except Exception as exc:
+            print(f"ARK POST {endpoint} failed: {exc}")
+            return None
+
+    def _patch(self, endpoint, json_data=None):
+        try:
+            r = requests.patch(f"{self.api}{endpoint}", headers=self.headers, json=json_data, timeout=10)
+            r.raise_for_status()
+            return r.json()
+        except Exception as exc:
+            print(f"ARK PATCH {endpoint} failed: {exc}")
+            return None
+
+    def init_project(self):
+        if not self.enabled:
+            return
+        resp = self._post("/projects", {"name": "autoresearch", "description": "Autonomous pretraining research"})
+        if resp and "id" in resp:
+            self.project_id = resp["id"]
+            print(f"ARK: project_id={self.project_id}")
+
+    def create_experiment(self, run_id, hyperparams):
+        if not self.enabled or not self.project_id:
+            return
+        resp = self._post("/experiments", {
+            "project_id": self.project_id,
+            "name": run_id,
+            "hyperparams": hyperparams,
+        })
+        if resp and "id" in resp:
+            self.experiment_id = resp["id"]
+            print(f"ARK: experiment_id={self.experiment_id}")
+
+    def update_metrics(self, metrics, status="running"):
+        if not self.enabled or not self.experiment_id:
+            return
+        self._patch(f"/experiments/{self.experiment_id}", {
+            "status": status,
+            "metrics": metrics,
+        })
+
+    def upload_artifact(self, name, kind, file_path=None, external_url=None, size_bytes=None):
+        if not self.enabled or not self.experiment_id:
+            return
+        endpoint = f"/experiments/{self.experiment_id}/artifacts"
+        if file_path:
+            try:
+                with open(file_path, "rb") as f:
+                    requests.post(
+                        f"{self.api}{endpoint}",
+                        headers=self.headers,
+                        files={"file": (name, f, "application/octet-stream")},
+                        data={"kind": kind, "name": name},
+                        timeout=60,
+                    )
+            except Exception as exc:
+                print(f"ARK artifact upload failed: {exc}")
+        elif external_url:
+            self._post(endpoint, {
+                "kind": kind,
+                "name": name,
+                "external_url": external_url,
+                "size_bytes": size_bytes or 0,
+            })
+
+    def mark_completed(self, metrics):
+        if not self.enabled or not self.experiment_id:
+            return
+        self._patch(f"/experiments/{self.experiment_id}", {
+            "status": "completed",
+            "metrics": metrics,
+        })
+
+
 def _run_training_once(runtime, tokenizer, config, device_batch_size, smoke_test):
     t_start = time.time()
     torch.manual_seed(42)
     torch.cuda.manual_seed(42)
     torch.set_float32_matmul_precision("high")
+
+    # --- Integrations init ---
+    run_id = _make_run_id()
+    wandb_config = {
+        "depth": DEPTH, "aspect_ratio": ASPECT_RATIO, "head_dim": HEAD_DIM,
+        "window_pattern": WINDOW_PATTERN, "total_batch_size": TOTAL_BATCH_SIZE,
+        "embedding_lr": EMBEDDING_LR, "unembedding_lr": UNEMBEDDING_LR,
+        "matrix_lr": MATRIX_LR, "scalar_lr": SCALAR_LR, "weight_decay": WEIGHT_DECAY,
+        "device_batch_size": device_batch_size, "max_seq_len": MAX_SEQ_LEN,
+        "gpu_name": runtime.gpu_name, "gpu_vram_gb": runtime.gpu_vram_gb,
+    }
+    wandb_run = _init_wandb(run_id, wandb_config)
+    ark = _ARKClient()
+    if ark.enabled:
+        ark.init_project()
+        hyperparams = {
+            "depth": DEPTH, "aspect_ratio": ASPECT_RATIO, "head_dim": HEAD_DIM,
+            "window_pattern": WINDOW_PATTERN, "total_batch_size": TOTAL_BATCH_SIZE,
+            "embedding_lr": EMBEDDING_LR, "unembedding_lr": UNEMBEDDING_LR,
+            "matrix_lr": MATRIX_LR, "scalar_lr": SCALAR_LR, "weight_decay": WEIGHT_DECAY,
+            "device_batch_size": device_batch_size, "max_seq_len": MAX_SEQ_LEN,
+            "gpu_name": runtime.gpu_name, "gpu_vram_gb": runtime.gpu_vram_gb,
+        }
+        ark.create_experiment(run_id, hyperparams)
+        ark.update_metrics({"step": 0, "status": "starting"})
 
     autocast_ctx = torch.amp.autocast(device_type=runtime.device_type, dtype=runtime.amp_dtype)
 
@@ -1171,6 +1578,27 @@ def _run_training_once(runtime, tokenizer, config, device_batch_size, smoke_test
             flush=True,
         )
 
+        # --- WandB per-step logging ---
+        wandb_metrics = {
+            "train/loss": debiased_smooth_loss,
+            "train/lr": lrm,
+            "train/tok_per_sec": tok_per_sec,
+            "train/progress_percent": pct_done,
+            "train/remaining_seconds": remaining,
+        }
+        if runtime.gpu_peak_flops:
+            wandb_metrics["train/mfu_percent"] = mfu
+        _wandb_log(wandb_run, wandb_metrics, step)
+
+        # --- ARK metrics stream (every 50 steps) ---
+        if step % 50 == 0 and step > 0:
+            ark.update_metrics({
+                "step": step,
+                "train_loss": round(debiased_smooth_loss, 6),
+                "tok_per_sec": tok_per_sec,
+                "progress_pct": round(pct_done, 1),
+            })
+
         if step == 0:
             gc.collect()
             gc.freeze()
@@ -1187,6 +1615,10 @@ def _run_training_once(runtime, tokenizer, config, device_batch_size, smoke_test
             break
 
     print()
+
+    # --- Post-training: finish wandb ---
+    _wandb_finish(wandb_run)
+
     return {
         "model": model,
         "num_params": num_params,
@@ -1195,6 +1627,9 @@ def _run_training_once(runtime, tokenizer, config, device_batch_size, smoke_test
         "step": step,
         "t_start": t_start,
         "t_start_training": t_start_training,
+        "run_id": run_id,
+        "wandb_url": wandb_run.url if wandb_run else None,
+        "ark": ark,
     }
 
 
@@ -1359,6 +1794,56 @@ def main():
     print(f"activation_checkpointing: {'enabled' if chosen_checkpointing else 'disabled'}")
     if args.smoke_test:
         print("smoke_test:       true")
+
+    # --- Post-training integrations: HF upload + ARK finalization ---
+    run_id = result.get("run_id", "unknown")
+    wandb_url = result.get("wandb_url")
+    ark = result.get("ark")
+
+    # HuggingFace: upload model + tokenizer + README
+    checkpoint_path = Path("checkpoint_pre_eval.pt")
+    hf_url = None
+    final_metrics = {
+        "val_bpb": round(val_bpb, 6),
+        "training_seconds": round(total_training_time, 1),
+        "peak_vram_mb": round(peak_vram_mb, 1),
+        "num_steps": step,
+        "num_params_M": round(num_params / 1e6, 1),
+        "total_tokens_M": round(total_tokens / 1e6, 1),
+    }
+    if steady_state_mfu is not None:
+        final_metrics["mfu_percent"] = round(steady_state_mfu, 2)
+
+    if checkpoint_path.exists() and val_bpb is not None:
+        hf_url = _hf_upload_model(run_id, checkpoint_path, val_bpb)
+        _hf_upload_tokenizer(run_id, tokenizer, val_bpb)
+        _hf_upload_readme(run_id, val_bpb, final_metrics)
+
+    # ARK: upload artifacts, report, and mark completed
+    config_dict = asdict(config) if config is not None else {}
+    if ark is not None and ark.enabled:
+        # Upload checkpoint as artifact
+        if checkpoint_path.exists():
+            ark.upload_artifact("model.pt", "model", file_path=str(checkpoint_path))
+
+        # Reference HF model as external artifact
+        if hf_url:
+            ark.upload_artifact("model.pt", "model", external_url=hf_url, size_bytes=checkpoint_path.stat().st_size)
+
+        # Reference wandb run as external artifact
+        if wandb_url:
+            ark.upload_artifact("wandb_run", "log", external_url=wandb_url)
+
+        # Upload REPORT.md
+        _ark_upload_report(ark, run_id, val_bpb, final_metrics, config_dict,
+                          status="keep", reason="Baseline run - first experiment")
+
+        ark.update_metrics(final_metrics, status="completed")
+        print("ARK: experiment marked completed")
+
+    # Cleanup: remove checkpoint
+    _cleanup_artifacts()
+
     return 0
 
 

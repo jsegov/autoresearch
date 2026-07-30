@@ -18,6 +18,16 @@ To set up a new experiment, work with the user to:
 
 Once you get confirmation, kick off the experimentation.
 
+## Integrations
+
+Each training run automatically:
+
+1. **Weights & Biases**: Logs per-step metrics (loss, LR, MFU, tok/sec) to wandb. Set `WANDB_API_KEY` in `.env`.
+2. **HuggingFace**: Uploads `model.pt` + `tokenizer.pkl` to `quik-models/autoresearch-{run_id}-bpb{val}`. Set `HF_TOKEN` in `.env`.
+3. **ai-research-keeper**: Creates experiment, streams metrics, uploads TB events + HF model link. Set `RESEARCH_VAULT_KEY` in `.env`.
+
+All integrations are non-fatal — if any fail, training continues normally.
+
 ## Experimentation
 
 Each experiment runs on a single GPU. The training script runs for a **fixed time budget of 5 minutes** (wall clock training time, excluding startup/compilation). You launch it simply as: `uv run train.py`.
