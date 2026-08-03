@@ -25,12 +25,12 @@ This project is intentionally separate from any existing trading bot codebase.
 2. Use dedicated 1-second intraday charts.
 3. Attach to: `ES`, `NQ`, `YM`, `RTY`, `E6`, `ZN`, `ZB`, `CL`, `GC`.
 4. Keep market depth enabled.
-5. Set exporter TCP port to `5562` for cross-market stream.
+5. Set exporter TCP port to `5563` for cross-market stream (vol metrics uses `5562`).
 6. Put the exporter on dedicated **1-second** charts for every market above.
 
 Optional:
 - Run a separate core ES/NQ OFI stream on `5561` if you want a dedicated target stream.
-- The Python service supports both `5561` and `5562`.
+- The Python service supports both `5561` and `5563`.
 
 ## Run
 
@@ -44,6 +44,8 @@ Optional Discord webhook alerts:
 
 - Set `DISCORD_WEBHOOK_ENABLED=true`
 - Set `DISCORD_WEBHOOK_URL=<your webhook>`
+- Discord content is a single line (`HIGH_PRIORITY | ES 5m LONG | 7521.62`);
+  full model/OFI/macro/risk detail continues to land in `SIGNAL_LOG_FILE` JSONL.
 - Optional filters:
   - `DISCORD_WEBHOOK_STATUSES=post,high_priority`
   - `DISCORD_WEBHOOK_MIN_CONFIDENCE=0.0`

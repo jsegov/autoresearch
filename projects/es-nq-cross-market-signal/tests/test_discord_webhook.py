@@ -67,11 +67,18 @@ def test_discord_notifier_filters_status_and_confidence() -> None:
     assert sent_ok is True
     assert len(calls) == 1
     content = str(calls[0]["content"])
-    assert "**POST | ES 5m LONG | 7621.25**" in content
-    assert "**Target OFI**  5s `+8`  15s `+12`  60s `+42`  300s `-16`  Z15 `+1.20`" in content
-    assert "**Cross Index**  Ready `3`  Confirm `2`  Against `1`  Lead `+1`" in content
-    assert "**Macro**  Ready `4`  Regime `+2`  Lead `-1`" in content
-    assert "**Large Trades**  60s `+40`  300s `+120`  Count `3`" in content
+    assert content == "POST | ES 5m LONG | 7621.25"
+    assert "Target OFI" not in content
+    assert "Cross Index" not in content
+    assert "Macro" not in content
+    assert "Large Trades" not in content
+
+
+def test_discord_format_message_high_priority_slim() -> None:
+    content = DiscordWebhookNotifier._format_message(
+        _payload(status="high_priority", confidence=0.9) | {"target_spot": 7521.62}
+    )
+    assert content == "HIGH_PRIORITY | ES 5m LONG | 7521.62"
 
 
 def test_discord_notifier_applies_cooldown() -> None:
