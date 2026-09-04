@@ -50,10 +50,10 @@ def test_discord_notifier_filters_status_and_confidence() -> None:
         cooldown_seconds=0.0,
         timeout_seconds=1.0,
     )
-    calls: list[dict[str, object]] = []
+    calls: list[tuple[str, dict[str, object]]] = []
 
-    def fake_post(payload: dict[str, object]) -> bool:
-        calls.append(payload)
+    def fake_post(webhook_url: str, payload: dict[str, object]) -> bool:
+        calls.append((webhook_url, payload))
         return True
 
     notifier._post_json = fake_post  # type: ignore[method-assign]
@@ -66,12 +66,33 @@ def test_discord_notifier_filters_status_and_confidence() -> None:
     assert sent_low_conf is False
     assert sent_ok is True
     assert len(calls) == 1
-    content = str(calls[0]["content"])
+    assert calls[0][0] == "https://example.test/webhook"
+    content = str(calls[0][1]["content"])
     assert content == "POST | ES 5m LONG | 7621.25"
     assert "Target OFI" not in content
     assert "Cross Index" not in content
     assert "Macro" not in content
     assert "Large Trades" not in content
+
+
+def test_discord_notifier_dual_posts_csv_webhooks() -> None:
+    notifier = DiscordWebhookNotifier(
+        webhook_url="https://example.test/a, https://example.test/b;https://example.test/a",
+        enabled_statuses=("post",),
+        min_confidence=0.0,
+        cooldown_seconds=0.0,
+        timeout_seconds=1.0,
+    )
+    calls: list[str] = []
+
+    def fake_post(webhook_url: str, payload: dict[str, object]) -> bool:
+        calls.append(webhook_url)
+        return True
+
+    notifier._post_json = fake_post  # type: ignore[method-assign]
+    sent = asyncio.run(notifier.send_if_needed(_payload(status="post", confidence=0.9)))
+    assert sent is True
+    assert calls == ["https://example.test/a", "https://example.test/b"]
 
 
 def test_discord_format_message_high_priority_slim() -> None:
@@ -89,10 +110,10 @@ def test_discord_notifier_applies_cooldown() -> None:
         cooldown_seconds=999.0,
         timeout_seconds=1.0,
     )
-    calls: list[dict[str, object]] = []
+    calls: list[tuple[str, dict[str, object]]] = []
 
-    def fake_post(payload: dict[str, object]) -> bool:
-        calls.append(payload)
+    def fake_post(webhook_url: str, payload: dict[str, object]) -> bool:
+        calls.append((webhook_url, payload))
         return True
 
     notifier._post_json = fake_post  # type: ignore[method-assign]
@@ -102,3 +123,50 @@ def test_discord_notifier_applies_cooldown() -> None:
     assert first is True
     assert second is False
     assert len(calls) == 1
+
+
+def test_market_scoped_cooldown_suppresses_second_horizon() -> None:
+    notifier = DiscordWebhookNotifier(
+        webhook_url="https://example.test/webhook",
+        enabled_statuses=("post",),
+        min_confidence=0.0,
+        cooldown_seconds=999.0,
+        timeout_seconds=1.0,
+        dedupe_scope="market",
+    )
+    calls: list[dict[str, object]] = []
+
+    def fake_post(webhook_url: str, payload: dict[str, object]) -> bool:
+        calls.append(payload)
+        return True
+
+    notifier._post_json = fake_post  # type: ignore[method-assign]
+    first = asyncio.run(notifier.send_if_needed(_payload() | {"market": "CL", "horizon_minutes": 5}))
+    second = asyncio.run(notifier.send_if_needed(_payload() | {"market": "CL", "horizon_minutes": 10}))
+    assert first is True
+    assert second is False
+    assert len(calls) == 1
+
+
+def test_failed_delivery_does_not_burn_cooldown() -> None:
+    notifier = DiscordWebhookNotifier(
+        webhook_url="https://example.test/webhook",
+        enabled_statuses=("post",),
+        min_confidence=0.0,
+        cooldown_seconds=999.0,
+        timeout_seconds=1.0,
+        dedupe_scope="market",
+    )
+    outcomes = iter((False, True))
+    calls = 0
+
+    def fake_post(webhook_url: str, payload: dict[str, object]) -> bool:
+        nonlocal calls
+        calls += 1
+        return next(outcomes)
+
+    notifier._post_json = fake_post  # type: ignore[method-assign]
+    payload = _payload() | {"market": "UB", "horizon_minutes": 10}
+    assert asyncio.run(notifier.send_if_needed(payload)) is False
+    assert asyncio.run(notifier.send_if_needed(payload)) is True
+    assert calls == 2

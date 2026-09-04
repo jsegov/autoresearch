@@ -33,3 +33,29 @@ This project uses cross-market signals as probabilistic context, not determinist
 ## Practical note
 
 All relationships are re-estimated from your own logs before live thresholds are promoted. Keep using calibration gates (`min_trades`, `min_win_rate`, `max_drawdown`) to prevent overfitting.
+
+## Fidelity fix log
+
+### 2026-07-01 — OFI computation corrected to CKS/CCZ definitions
+The ACSIL exporter (`sierra_chart/CrossMarket_OFI_Export.cpp`) previously computed
+`ofi = delta(aggregated bid depth) - delta(aggregated ask depth)`. That is a depth-delta
+proxy: it equals Cont/Kukanov/Stoikov (2014, sec 2.2 eq 2-3) OFI only when best bid/ask
+prices are unchanged between samples, and can take the WRONG SIGN on price transitions
+(e.g. ask lifts bullishly while deeper liquidity scrolls into the window).
+
+Changes:
+- Exporter now also emits `ofi_cks` (best-level snapshot OFI per CKS 2014),
+  `ofi_deep` (per-level OFI summed over tracked levels, per Cont/Cucuringu/Zhang 2023
+  sec 2.1), and `ofi_norm` (`ofi_deep` / ~50-sample EMA of avg book depth, per CCZ
+  normalization; scale-free across the ES/NQ/YM/RTY/VX/E6/ZN/ZB/CL/GC universe).
+  Legacy `ofi` field kept for continuity. REQUIRES Sierra Chart DLL rebuild.
+- `src/esnq_signal/ofi_stream.py`: `OfiSample` carries the new fields (None on legacy
+  payloads); `effective_ofi()` prefers `ofi_cks`, falls back to legacy.
+- `src/esnq_signal/features.py`: feature windows/z-scores now ingest `effective_ofi()`.
+- Tests: `test_effective_ofi_prefers_cks_falls_back_legacy`,
+  `test_feature_store_ingests_cks_ofi` (43 passing).
+
+IMPORTANT: after rebuilding the DLL, re-run calibration (per "Practical note" above) —
+OFI magnitudes change on price-transition samples, so promoted thresholds
+(`min_trades`, `min_win_rate`, `max_drawdown` gates) must be re-estimated. Prefer
+`ofi_norm` for any new absolute thresholds (comparable across markets/regimes).

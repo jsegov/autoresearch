@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import math
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Awaitable, Callable
@@ -36,9 +37,7 @@ def _num(value: Any) -> float | None:
         parsed = float(value)
     except (TypeError, ValueError):
         return None
-    if parsed != parsed:
-        return None
-    return parsed
+    return parsed if math.isfinite(parsed) else None
 
 
 @dataclass(frozen=True)
@@ -53,13 +52,40 @@ class OfiSample:
     spot: float | None
     bar_delta: float | None
     source: str
+    # CKS/CCZ fields (CrossMarket_OFI_Export.cpp >= 2026-07-01):
+    #   ofi_cks  - best-level OFI, Cont/Kukanov/Stoikov 2014 sec 2.2 eq (2)-(3)
+    #   ofi_deep - per-level OFI summed over tracked levels, CCZ 2023 sec 2.1
+    #   ofi_norm - ofi_deep / EMA(avg depth), CCZ normalization (scale-free)
+    # None (default) when the exporter DLL predates the fix.
+    ofi_cks: float | None = None
+    ofi_deep: float | None = None
+    ofi_norm: float | None = None
+    # Authoritative contract identifier supplied by Sierra.  Never derive
+    # rolls from a calendar; a changed non-empty value is the roll event.
+    contract_id: str | None = None
+    # Native-equity Time & Sales fallback.  The exporter reports a bounded
+    # 15-second bid/ask-attributed imbalance and never aliases it to L2 OFI.
+    trade_imbalance_15s: float | None = None
+    trade_imbalance_norm: float | None = None
+    trade_volume_15s: float | None = None
+    l2_available: bool | None = None
+    input_mode: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "market": self.market,
             "symbol_raw": self.symbol_raw,
+            "contract_id": self.contract_id,
             "timestamp_utc": self.timestamp_utc.isoformat(timespec="milliseconds"),
             "ofi_1s": self.ofi_1s,
+            "ofi_cks": self.ofi_cks,
+            "ofi_deep": self.ofi_deep,
+            "ofi_norm": self.ofi_norm,
+            "trade_imbalance_15s": self.trade_imbalance_15s,
+            "trade_imbalance_norm": self.trade_imbalance_norm,
+            "trade_volume_15s": self.trade_volume_15s,
+            "l2_available": self.l2_available,
+            "input_mode": self.input_mode,
             "spread": self.spread,
             "bid_depth": self.bid_depth,
             "ask_depth": self.ask_depth,
@@ -77,18 +103,50 @@ def parse_ofi_payload(payload: dict[str, Any], source: str) -> OfiSample | None:
     ts = parse_ts_utc(payload.get("ts") or payload.get("timestamp_utc") or payload.get("timestamp"))
     if ts is None:
         return None
+    ofi_norm = _num(payload.get("ofi_norm"))
+    l2_raw = payload.get("l2_available")
+    l2_available = bool(l2_raw) if isinstance(l2_raw, bool) else (ofi_norm is not None)
+    mode_raw = str(payload.get("input_mode") or "").strip().lower()
+    input_mode = mode_raw if mode_raw in {"l2_ofi", "trade_imbalance"} else None
     return OfiSample(
         market=market,
         symbol_raw=symbol_raw,
         timestamp_utc=ts,
         ofi_1s=_num(payload.get("ofi") if payload.get("ofi") is not None else payload.get("ofi_1s")),
+        ofi_cks=_num(payload.get("ofi_cks")),
+        ofi_deep=_num(payload.get("ofi_deep")),
+        ofi_norm=ofi_norm,
+        contract_id=str(payload.get("contract_id") or symbol_raw).strip() or None,
         spread=_num(payload.get("spread")),
         bid_depth=_num(payload.get("bid_depth")),
         ask_depth=_num(payload.get("ask_depth")),
         spot=_num(payload.get("spot")),
         bar_delta=_num(payload.get("bar_delta")),
         source=source,
+        trade_imbalance_15s=_num(payload.get("trade_imbalance_15s")),
+        trade_imbalance_norm=_num(payload.get("trade_imbalance_norm")),
+        trade_volume_15s=_num(payload.get("trade_volume_15s")),
+        l2_available=l2_available,
+        input_mode=input_mode,
     )
+
+
+def effective_ofi(sample: "OfiSample") -> float | None:
+    """Corrected OFI with legacy fallback.
+
+    Prefers ofi_cks (Cont/Kukanov/Stoikov 2014 - same contract units as the
+    legacy field, so calibrated magnitudes stay comparable); falls back to the
+    legacy depth-delta ofi_1s when the exporter has not been rebuilt yet.
+    Per CROSS_MARKET_EVIDENCE.md, thresholds are re-estimated from logs before
+    promotion - re-run calibration after the exporter upgrade."""
+    if sample.ofi_cks is not None:
+        return sample.ofi_cks
+    return sample.ofi_1s
+
+
+def normalized_ofi(sample: "OfiSample") -> float | None:
+    """Scale-free OFI for cross-product votes, with no raw fallback."""
+    return sample.ofi_norm
 
 
 OnSample = Callable[[OfiSample], Awaitable[None]]
@@ -154,4 +212,3 @@ class OfiTcpStream:
 
     def stop(self) -> None:
         self._stop.set()
-

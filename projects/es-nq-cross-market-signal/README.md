@@ -1,6 +1,7 @@
-# ES/NQ Cross-Market Signal (Standalone)
+# Cross-Market Futures Signal (ES/NQ + Experimental CL/UB)
 
 Standalone 5-10 minute ES/NQ direction signal built from Sierra OFI streams.
+CL (5m/10m) and UB (10m/30m) are additive rules-first experimental lanes.
 This project is intentionally separate from any existing trading bot codebase.
 
 ## What It Includes
@@ -23,7 +24,8 @@ This project is intentionally separate from any existing trading bot codebase.
 
 1. Compile and attach `CrossMarket_OFI_Export.cpp` in Sierra.
 2. Use dedicated 1-second intraday charts.
-3. Attach to: `ES`, `NQ`, `YM`, `RTY`, `E6`, `ZN`, `ZB`, `CL`, `GC`.
+3. Attach to: `ES`, `NQ`, `YM`, `RTY`, `E6`, `ZF`, `ZN`, `TN`, `ZB`,
+   `UB`, `CL`, `RB`, `HO`, `NG`, `GC`, and `VX` as available.
 4. Keep market depth enabled.
 5. Set exporter TCP port to `5563` for cross-market stream (vol metrics uses `5562`).
 6. Put the exporter on dedicated **1-second** charts for every market above.
@@ -50,6 +52,38 @@ Optional Discord webhook alerts:
   - `DISCORD_WEBHOOK_STATUSES=post,high_priority`
   - `DISCORD_WEBHOOK_MIN_CONFIDENCE=0.0`
   - `DISCORD_WEBHOOK_COOLDOWN_SECONDS=45`
+
+### Experimental CL/UB lane
+
+- CL primary normalized-OFI peers: `RB`, `HO` (one aligned, no strong
+  opposing primary). Context: `NG`, `E6`, `ES`, `GC`.
+- UB primary normalized-OFI peers: `ZB`, `TN`, `ZN` (two aligned and no
+  strong opposing primary).
+  Context: `ZF`, `ES`, `GC`.
+- Cross-product votes require Sierra `ofi_norm`; raw OFI never substitutes.
+- The Sierra raw chart symbol is carried as `contract_id`. Any observed
+  identifier change resets that market's history and starts a 10-minute
+  target/peer cohort warm-up. Each primary peer is also excluded for 10
+  minutes following its own contract change. Roll dates are never inferred.
+- Experimental posting requires a raw contract identifier containing the
+  product root, futures month code, and year (for example `F.US.CLU26`).
+- Rules-first rows use `signal_kind=rules_first`, a non-probability
+  `rule_score`, and `p_up`, `p_hit`, and `confidence` are null.
+- Feature and rules-first research rows are logged across the full running
+  session. Outside 09:30-16:00 ET they use `reason=outside_alert_session`
+  and cannot notify or pulse Sierra. In-session notifications use only the
+  primary research horizon (CL 5m, UB 10m) with one cooldown per product.
+
+Promotion is intentionally two-step and fail closed:
+
+1. After the chartbook/PropAlpha smoke test, add a product to
+   `EXPERIMENTAL_SMOKE_VALIDATED_MARKETS`.
+2. Configure its separate webhook and enable only its product switch
+   (`EXPERIMENTAL_CL_POSTING_ENABLED` or
+   `EXPERIMENTAL_UB_POSTING_ENABLED`).
+
+Both switches and the smoke allowlist are empty/off by default. ES/NQ keep
+their existing model/calibration and webhook behavior.
 
 Optional rolling side guard (auto-throttle weak long/short side by market+horizon):
 

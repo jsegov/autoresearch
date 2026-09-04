@@ -57,8 +57,11 @@ class Settings:
     enable_cross_stream: bool
     signal_emit_interval_seconds: float
     signal_stale_seconds: float
+    enabled_target_markets: tuple[str, ...]
     max_spread_es: float
     max_spread_nq: float
+    max_spread_cl: float
+    max_spread_ub: float
     calibration_file: Path | None
     model_file: Path | None
     data_dir: Path
@@ -70,6 +73,21 @@ class Settings:
     discord_webhook_min_confidence: float
     discord_webhook_cooldown_seconds: float
     discord_webhook_timeout_seconds: float
+    experimental_cl_posting_enabled: bool
+    experimental_ub_posting_enabled: bool
+    experimental_smoke_validated_markets: tuple[str, ...]
+    experimental_cl_discord_webhook_url: str
+    experimental_ub_discord_webhook_url: str
+    experimental_discord_cooldown_seconds: float
+    mega_equities_enabled: bool
+    mega_equity_markets: tuple[str, ...]
+    mega_equity_post_markets: tuple[str, ...]
+    mega_equity_smoke_validated_markets: tuple[str, ...]
+    equity_breadth_url: str
+    equity_breadth_proxy_secret: str
+    equity_breadth_poll_seconds: float
+    equity_breadth_timeout_seconds: float
+    mega_equity_early_close_dates: tuple[str, ...]
     rth_only_enabled: bool
     rth_start_et: str
     rth_end_et: str
@@ -89,6 +107,8 @@ class Settings:
     anomaly_overlay_discord_webhook_url: str
     anomaly_overlay_discord_cooldown_seconds: float
     gexbot_context_cache_file: Path | None
+    sierra_alert_bridge_enabled: bool
+    sierra_alert_bridge_path: Path
 
     @staticmethod
     def from_env() -> "Settings":
@@ -116,13 +136,18 @@ class Settings:
             core_ofi_host=_env("CORE_OFI_HOST", "127.0.0.1"),
             core_ofi_port=_env_int("CORE_OFI_PORT", 5561),
             cross_ofi_host=_env("CROSS_OFI_HOST", "127.0.0.1"),
-            cross_ofi_port=_env_int("CROSS_OFI_PORT", 5562),
+            cross_ofi_port=_env_int("CROSS_OFI_PORT", 5563),
             enable_core_stream=_env_bool("ENABLE_CORE_STREAM", False),
             enable_cross_stream=_env_bool("ENABLE_CROSS_STREAM", True),
             signal_emit_interval_seconds=max(0.2, _env_float("SIGNAL_EMIT_INTERVAL_SECONDS", 1.0)),
             signal_stale_seconds=max(0.1, _env_float("SIGNAL_STALE_SECONDS", 2.0)),
+            enabled_target_markets=tuple(
+                value.upper() for value in _env_csv("ENABLED_TARGET_MARKETS", "ES,NQ,CL,UB")
+            ),
             max_spread_es=max(0.01, _env_float("MAX_SPREAD_ES", 1.0)),
             max_spread_nq=max(0.01, _env_float("MAX_SPREAD_NQ", 2.0)),
+            max_spread_cl=max(0.001, _env_float("MAX_SPREAD_CL", 0.05)),
+            max_spread_ub=max(0.001, _env_float("MAX_SPREAD_UB", 0.0625)),
             calibration_file=calibration_file,
             model_file=model_file,
             data_dir=data_dir,
@@ -134,6 +159,46 @@ class Settings:
             discord_webhook_min_confidence=max(0.0, _env_float("DISCORD_WEBHOOK_MIN_CONFIDENCE", 0.0)),
             discord_webhook_cooldown_seconds=max(0.0, _env_float("DISCORD_WEBHOOK_COOLDOWN_SECONDS", 45.0)),
             discord_webhook_timeout_seconds=max(0.5, _env_float("DISCORD_WEBHOOK_TIMEOUT_SECONDS", 5.0)),
+            experimental_cl_posting_enabled=_env_bool("EXPERIMENTAL_CL_POSTING_ENABLED", False),
+            experimental_ub_posting_enabled=_env_bool("EXPERIMENTAL_UB_POSTING_ENABLED", False),
+            experimental_smoke_validated_markets=tuple(
+                value.upper()
+                for value in _env_csv("EXPERIMENTAL_SMOKE_VALIDATED_MARKETS", "")
+            ),
+            experimental_cl_discord_webhook_url=_env("EXPERIMENTAL_CL_DISCORD_WEBHOOK_URL", ""),
+            experimental_ub_discord_webhook_url=_env("EXPERIMENTAL_UB_DISCORD_WEBHOOK_URL", ""),
+            experimental_discord_cooldown_seconds=max(
+                0.0, _env_float("EXPERIMENTAL_DISCORD_COOLDOWN_SECONDS", 180.0)
+            ),
+            mega_equities_enabled=_env_bool("MEGA_EQUITIES_ENABLED", False),
+            mega_equity_markets=tuple(
+                value.upper()
+                for value in _env_csv(
+                    "MEGA_EQUITY_MARKETS",
+                    "AAPL,GOOG,GOOGL,MSFT,META,TSLA,SPCX,NVDA,AMZN",
+                )
+            ),
+            mega_equity_post_markets=tuple(
+                value.upper() for value in _env_csv("MEGA_EQUITY_POST_MARKETS", "")
+            ),
+            mega_equity_smoke_validated_markets=tuple(
+                value.upper()
+                for value in _env_csv("MEGA_EQUITY_SMOKE_VALIDATED_MARKETS", "")
+            ),
+            equity_breadth_url=_env(
+                "EQUITY_BREADTH_URL",
+                "http://127.0.0.1:8081/api/options/v1/equity-breadth",
+            ),
+            equity_breadth_proxy_secret=_env("EQUITY_BREADTH_PROXY_SECRET", ""),
+            equity_breadth_poll_seconds=max(
+                0.2, _env_float("EQUITY_BREADTH_POLL_SECONDS", 1.0)
+            ),
+            equity_breadth_timeout_seconds=max(
+                0.2, _env_float("EQUITY_BREADTH_TIMEOUT_SECONDS", 1.0)
+            ),
+            mega_equity_early_close_dates=tuple(
+                value for value in _env_csv("MEGA_EQUITY_EARLY_CLOSE_DATES", "")
+            ),
             rth_only_enabled=_env_bool("RTH_ONLY_ENABLED", False),
             rth_start_et=_env("RTH_START_ET", "09:30"),
             rth_end_et=_env("RTH_END_ET", "16:00"),
@@ -159,4 +224,8 @@ class Settings:
                 0.0, _env_float("ANOMALY_OVERLAY_DISCORD_COOLDOWN_SECONDS", 120.0)
             ),
             gexbot_context_cache_file=gexbot_context_cache_file,
+            sierra_alert_bridge_enabled=_env_bool("SIERRA_ALERT_BRIDGE_ENABLED", False),
+            sierra_alert_bridge_path=Path(
+                _env("SIERRA_ALERT_BRIDGE_PATH", r"C:\SierraChart\Data\external_alert_signals.tsv")
+            ),
         )

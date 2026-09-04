@@ -35,6 +35,20 @@ def _clean_statuses(values: tuple[str, ...]) -> tuple[str, ...]:
     return tuple(sorted(allowed))
 
 
+def _parse_webhook_urls(raw: str | None) -> tuple[str, ...]:
+    """Accept a single URL or comma/semicolon-separated list (deduped, order preserved)."""
+
+    seen: set[str] = set()
+    urls: list[str] = []
+    for part in str(raw or "").replace(";", ",").split(","):
+        url = part.strip()
+        if not url or url in seen:
+            continue
+        seen.add(url)
+        urls.append(url)
+    return tuple(urls)
+
+
 class DiscordWebhookNotifier:
     def __init__(
         self,
@@ -44,16 +58,18 @@ class DiscordWebhookNotifier:
         min_confidence: float,
         cooldown_seconds: float,
         timeout_seconds: float,
+        dedupe_scope: str = "signal",
     ) -> None:
-        self._webhook_url = str(webhook_url or "").strip()
+        self._webhook_urls = _parse_webhook_urls(webhook_url)
         self._enabled_statuses = _clean_statuses(enabled_statuses)
         self._min_confidence = max(0.0, float(min_confidence))
         self._cooldown_seconds = max(0.0, float(cooldown_seconds))
         self._timeout_seconds = max(0.5, float(timeout_seconds))
+        self._dedupe_scope = "market" if str(dedupe_scope).lower() == "market" else "signal"
         self._last_attempt_by_key: dict[str, float] = {}
 
     async def send_if_needed(self, signal_payload: dict[str, Any]) -> bool:
-        if not self._webhook_url:
+        if not self._webhook_urls:
             return False
 
         status = str(signal_payload.get("status") or "").strip().lower()
@@ -69,17 +85,24 @@ class DiscordWebhookNotifier:
         last_attempt = self._last_attempt_by_key.get(dedupe_key)
         if last_attempt is not None and (now - last_attempt) < self._cooldown_seconds:
             return False
-        self._last_attempt_by_key[dedupe_key] = now
-
         payload = {
             "content": self._format_message(signal_payload),
             "allowed_mentions": {"parse": []},
         }
-        return await asyncio.to_thread(self._post_json, payload)
+        results = await asyncio.gather(
+            *(asyncio.to_thread(self._post_json, url, payload) for url in self._webhook_urls)
+        )
+        delivered = any(results)
+        if delivered:
+            # Failed delivery remains immediately retryable; cooldown measures
+            # successful alerts, not attempts.
+            self._last_attempt_by_key[dedupe_key] = now
+        return delivered
 
-    @staticmethod
-    def _dedupe_key(signal_payload: dict[str, Any]) -> str:
+    def _dedupe_key(self, signal_payload: dict[str, Any]) -> str:
         market = str(signal_payload.get("market") or "").upper()
+        if self._dedupe_scope == "market":
+            return market
         horizon = int(signal_payload.get("horizon_minutes") or 0)
         direction = str(signal_payload.get("direction") or "").lower()
         status = str(signal_payload.get("status") or "").lower()
@@ -97,10 +120,10 @@ class DiscordWebhookNotifier:
         direction_label = "LONG" if direction == "LONG" else ("SHORT" if direction == "SHORT" else "NEUTRAL")
         return f"{status} | {market} {horizon}m {direction_label} | {price_text}"
 
-    def _post_json(self, payload: dict[str, Any]) -> bool:
+    def _post_json(self, webhook_url: str, payload: dict[str, Any]) -> bool:
         body = json.dumps(payload, ensure_ascii=True).encode("utf-8")
         request = urllib.request.Request(
-            self._webhook_url,
+            webhook_url,
             data=body,
             headers={
                 "Content-Type": "application/json",
